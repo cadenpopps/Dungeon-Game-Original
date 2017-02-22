@@ -14,7 +14,10 @@ class Dungeon {
       if (i>0) {
         floors.add(new Floor(i, numSquares, floors.get(i-1).stairDown));
       } else {
-        floors.add(new Floor(i, numSquares, new PVector(10, 10)));
+        PVector entrance = new PVector();
+        entrance.x = (int)random(5,numSquares-5);
+        entrance.y = (int)random(5,numSquares-5);
+        floors.add(new Floor(i, numSquares, entrance));
       }
     }
   }
