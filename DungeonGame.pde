@@ -9,7 +9,7 @@ void setup() {
   //fullScreen(P2D, 2);
 
   textSize(20);
-  stroke(50);
+
   startUp();
 }
 
@@ -24,7 +24,7 @@ void draw() {
   translate(50, 50);
   for (int i = 0; i < numSquares; i++) {
     for (int j = 0; j < numSquares; j++) {
-      Square curSquare = dungeon.floors.get(currentFloor).squares[i][j];
+      Square curSquare = dungeon.floors .get(currentFloor).squares[i][j];
       int curSquareType = curSquare.squareType;
       if (curSquareType==-1) {
         fill(50);
@@ -49,8 +49,8 @@ void startUp() {
 
   //need random number of floors
   
-  floors = 4;
-  squares = (int)random(35, 45);
+  floors = 1;
+  squares = (int)random(19, 21);
 
   currentFloor = 0;
   currentX = (int)random(squares);
