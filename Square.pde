@@ -3,6 +3,8 @@ class Square {
   int locX, locY;
   int difficulty;
   int squareType;
+  //up, right, down, left
+  boolean[] walls;
 
   public Square(int x, int y, int dif, int type) {
 
@@ -11,10 +13,10 @@ class Square {
     locY = y;
     difficulty = dif;
     squareType = type;
+    walls = new boolean[4];
   }
-  
-  public Square copy(){
+
+  public Square copy() {
     return(new Square(this.locX, this.locY, this.difficulty, this.squareType));
   }
-  
 }
