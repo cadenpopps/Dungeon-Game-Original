@@ -21,9 +21,9 @@ class Region {
 
   public void connect() {
     connected = true;
-    regionColor[0] = 200;
-    regionColor[1] = 200;
-    regionColor[2] = 200;
+    regionColor[0] = 255;
+    regionColor[1] = 255;
+    regionColor[2] = 255;
 
     for (Square s : children) {
       s.regionColor = this.regionColor;

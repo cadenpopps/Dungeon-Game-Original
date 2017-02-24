@@ -10,7 +10,7 @@ class Floor {
   ArrayList<Region> regions;
   ArrayList<Square> connectors;
   boolean notVisited = true;
-  final int roomTries = 100, maxRoomSize = 9, minRoomSize = 4, roomOffSet = 3;
+  final int roomTries = 300, maxRoomSize = 9, minRoomSize = 4, roomOffSet = 3;
 
   public Floor(int loc, int numSq, PVector stair) {
 
@@ -25,7 +25,7 @@ class Floor {
     //generate board, only up stair and downstair rooms
     genBoard();
     //generate rest of dungeon, all rooms and passages
-    genDungeon();
+    //genDungeon();
     //makes sure stair locations aren't overwritten
     squares[(int)stairUp.x][(int)stairUp.y].squareType = -3;
     squares[(int)stairDown.x][(int)stairDown.y].squareType = -2;
@@ -63,16 +63,20 @@ class Floor {
     }
   }
 
-  public void genDungeon() {
+  public void genDungeon(int step) {
 
     //generate the rooms of dungeon, no overlap
-    genRooms();
+    if (step ==0)
+      genRooms();
     //fill in rest of spaces with maze
-    genMaze();
+    if (step ==1)
+      genMaze();
     //connect regions
-    connectRegions();
+    if (step ==2)
+      connectRegions();
     //make maze sparse
-
+    if (step ==3)
+      sparseMaze();
     //populate?
   }
 
@@ -135,7 +139,7 @@ class Floor {
     for (int x = 0; x<numSquares; x++) {
       for (int y = 0; y<numSquares; y++) {
         if (x%2==1 || y%2==1) {
-          if (x>0 && y>0 && squares[x][y].squareType == -1 && squares[x][y].neighbors(squares)<2 && squares[x-1][y].squareType == -1 && squares[x][y-1].squareType == -1) {
+          if (x>0 && y>0 && squares[x][y].squareType == -1 && squares[x][y].neighbors(squares, numSquares)<2 && squares[x-1][y].squareType == -1 && squares[x][y-1].squareType == -1) {
             ArrayList<Square> temp = new ArrayList<Square>();
             cur.x = x;
             cur.y = y;
@@ -143,10 +147,11 @@ class Floor {
 
               squares[(int)cur.x][(int)cur.y].squareType = 0;
               temp.add(squares[(int)cur.x][(int)cur.y]);
-              ArrayList<PVector> moves = squares[(int)cur.x][(int)cur.y].moves(squares);
+              ArrayList<PVector> moves = squares[(int)cur.x][(int)cur.y].moves(squares, numSquares);
               if (!moves.isEmpty()) {
                 moveStack.push(cur);
-                int randomMove = (int)random(0, moves.size());
+                //int randomMove = (int)random(0, moves.size());
+                int randomMove = (int)map(random(1), 0, 1, 0, moves.size());
                 cur = moves.get(randomMove).copy();
               } else if (!moveStack.isEmpty()) {
                 cur = (PVector)moveStack.peek();
@@ -174,10 +179,17 @@ class Floor {
     for (int i = 0; i<numSquares; i++) {
       for (int j = 0; j<numSquares; j++) {
         if (i==numSquares-1 || j==numSquares-1 || i==0 || j==0) {
-          squares[i][j].squareType = -1;
+          //squares[i][j].squareType = -1;
         }
       }
     }
+    /*for (int i = 1; i<numSquares-1; i++) {
+     for (int j = 1; j<numSquares-1; j++) {
+     if (squares[i][j].squareType ==0 && squares[i][j].neighbors(squares, numSquares)==2 && random(1)<.005) {
+     //squares[i][j].squareType = -1;
+     }
+     }
+     }*/
   }
 
   public void connectRegions() {
@@ -191,29 +203,76 @@ class Floor {
       }
     }
 
-    regions.get(0).connected = true;
     boolean allConnected = false;
+    ArrayList<Square> curSquare;
 
-   /* whi le (!allConnected) {
+    while (!allConnected) {
       for (Region r : regions) {
         if (!r.connected) {
-          for(Square c : connectors){
-             //if(c.locX == ) 
+          ArrayList<Square> adjacent = new ArrayList<Square>();
+          curSquare = new ArrayList<Square>();
+          for (Square c : connectors) {
+            
+            if (c.adjacentTo(r) && !r.connected) {
+              
+              adjacent.add(c);
+              curSquare.add(c);
+            }
           }
-        
+          if (!adjacent.isEmpty()) {
+            connectors.remove(curSquare);
+            int temp = (int) random(adjacent.size());
+            adjacent.get(temp).squareType = -5;
+            adjacent.get(temp).region = r;
+            r.connect();
+            for (Square s : connectors) {
+              if (s.adjacentTo(r)) {
+                connectors.remove(s);
+              }
+            }
+          }
         }
       }
-
-
-
-
-
       allConnected = true;
       for (Region r : regions) {
         if (!r.connected) {
           allConnected = false;
         }
       }
-    }*/
+    }
+  }
+
+  public void sparseMaze() {
+
+    boolean deadends = true;
+
+    while (deadends) {
+
+      for (int i = 0; i<numSquares; i++) {
+        for (int j = 0; j<numSquares; j++) {
+          if (squares[i][j].deadend) {
+            squares[i][j].deadend = false;
+            squares[i][j].squareType = -1;
+          }
+        }
+      }
+
+      for (int i = 0; i<numSquares; i++) {
+        for (int j = 0; j<numSquares; j++) {
+          if (squares[i][j].squareType == 0 && squares[i][j].neighbors(squares, numSquares) < 2 && random(1)<.99) {
+            squares[i][j].deadend = true;
+          }
+        }
+      }
+
+      deadends = false;
+      for (int i = 0; i<numSquares; i++) {
+        for (int j = 0; j<numSquares; j++) {
+          if (squares[i][j].squareType == 0 && squares[i][j].deadend) {
+            deadends = true;
+          }
+        }
+      }
+    }
   }
 }

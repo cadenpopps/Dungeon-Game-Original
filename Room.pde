@@ -31,10 +31,10 @@ class Room {
     if (y2>numSquares-1) {
       y2 = numSquares-1;
     }
-    if (x2==numSquares-2) {
+    if (x2==numSquares-1) {
       x2 = numSquares-1;
     }
-    if (y2==numSquares-2) {
+    if (y2==numSquares-1) {
       y2 = numSquares-1;
     }
 

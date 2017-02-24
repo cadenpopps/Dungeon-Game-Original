@@ -2,7 +2,7 @@
 Dungeon dungeon;
 int currentFloor, currentX, currentY;
 int floors, squares;
-
+int step = 0;
 int counter = 0;
 
 void setup() {
@@ -17,11 +17,11 @@ void setup() {
 
 void draw() {
 
-  if (counter==1000) {
+  if (counter==1) {
     startUp();
     counter = 0;
   }
-  counter ++;
+  //counter ++;
 
   background(200);
 
@@ -43,7 +43,9 @@ void draw() {
       } else if (curSquare.squareType ==-3) {
         fill(0, 150, 0);
       } else if (curSquare.squareType == 5) {
-        fill(0);
+        fill(50);
+      } else if (curSquare.squareType == -5) {
+        fill(150, 130, 130);
       }
 
       rect(i*squareSize, j*squareSize, squareSize, squareSize);
@@ -60,8 +62,8 @@ void startUp() {
   //need random number of floors
 
   floors = 1;
-  squares = (int)random(55, 65);
-  if (squares%2==1) {
+  squares = (int)random(20, 30);
+  if (squares%2==0) {
     squares--;
   }
 
@@ -75,11 +77,15 @@ void startUp() {
 void mousePressed() {
 
   if (mouseButton == LEFT) {
-    if (currentFloor<floors-1) {
+    /*if (currentFloor<floors-1) {
       currentFloor++;
     } else {
       currentFloor = 0;
-    }
+    }*/
+    dungeon.floors.get(currentFloor).genDungeon(step);
+    step++;
+    if(step>4)
+    step = 0;
   }
 
   if (mouseButton == RIGHT) {
