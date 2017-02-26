@@ -9,10 +9,14 @@ class Floor {
   ArrayList<Room> rooms;
   ArrayList<Region> regions;
   ArrayList<Square> connectors;
-  boolean notVisited = true;
-  final int roomTries = 300, maxRoomSize = 9, minRoomSize = 4, roomOffSet = 3;
+  boolean notVisited;
+  boolean showCreation;
+  final int roomTries = 500; 
+  int maxRoomSize, minRoomSize, roomOffSet;
 
-  public Floor(int loc, int numSq, PVector stair) {
+
+  //makes a new floor with a location, number of squares, an upStair, and arraylists of rooms, regions, and connectors
+  public Floor(int loc, int numSq, PVector stair, boolean delay) {
 
     //new floor stores floor #, width/height of board, location of the up stair, and an collection of rooms
     floorNum = loc;
@@ -21,16 +25,21 @@ class Floor {
     rooms = new ArrayList<Room>();
     regions = new ArrayList<Region>();
     connectors = new ArrayList<Square>();
+    showCreation = delay;
+    maxRoomSize = (int)numSquares/4;
+    minRoomSize = (int)maxRoomSize/4+1;
+    roomOffSet = (int)minRoomSize/2+2;
 
     //generate board, only up stair and downstair rooms
     genBoard();
     //generate rest of dungeon, all rooms and passages
-    //genDungeon();
-    //makes sure stair locations aren't overwritten
-    squares[(int)stairUp.x][(int)stairUp.y].squareType = -3;
-    squares[(int)stairDown.x][(int)stairDown.y].squareType = -2;
+    if (!showCreation) {
+      genDungeon();
+    }
   }
 
+
+  //initializes the board, and makes a new downstair
   public void genBoard() {
 
     //initializes a new board
@@ -48,7 +57,7 @@ class Floor {
     stairDown = new PVector((int)random(4, numSquares-4), (int)random(4, numSquares-4));
 
     //check if up and down stair too close
-    while (abs(stairDown.x-stairUp.x) < 10 && abs(stairDown.y-stairUp.y) < 10) {
+    while (abs(stairDown.x-stairUp.x) < numSquares/3 && abs(stairDown.y-stairUp.y) < numSquares/3) {
       stairDown.x = (int)random(4, numSquares-4);
       stairDown.y = (int)random(4, numSquares-4);
     }
@@ -63,31 +72,72 @@ class Floor {
     }
   }
 
-  public void genDungeon(int step) {
+
+  //generates board all at once
+  public void genDungeon() {
 
     //generate the rooms of dungeon, no overlap
-    if (step ==0)
-      genRooms();
-    //fill in rest of spaces with maze
-    if (step ==1)
-      genMaze();
-    //connect regions
-    if (step ==2)
-      connectRegions();
-    //make maze sparse
-    if (step ==3)
-      sparseMaze();
-    //populate?
+    genRooms();
+    genMaze();
+    connectRegions();
+    sparseMaze();
+    removeDetours();
+    removeDetours();
+    //removeDetours();
+
+    //makes sure stair locations aren't overwritten
+    squares[(int)stairUp.x][(int)stairUp.y].squareType = -3;
+    squares[(int)stairDown.x][(int)stairDown.y].squareType = -2;
+
+    for (int i = 0; i<numSquares; i++) {
+      for (int j = 0; j<numSquares; j++) {
+        if (squares[i][j].squareType == 5) {
+          squares[i][j].squareType = -1;
+        }
+      }
+    }
+
+    rooms = null;
+    regions = null;
+    connectors = null;
   }
 
+  //generates board one step at a time
+  public void genDungeon(int step) {
+
+    if (step == 0) {
+      genRooms();
+    } else if (step == 1) {
+      genMaze();
+    } else if (step == 2) {
+      connectRegions();
+    } else if (step == 3) {
+      sparseMaze();
+    } else if (step == 4) {
+      removeDetours();
+    } else if (step == 5) {
+      removeDetours();
+    } else if (step == 6) {
+      rooms = null;
+      regions = null;
+      connectors = null;
+    }
+
+    //makes sure stair locations aren't overwritten
+    squares[(int)stairUp.x][(int)stairUp.y].squareType = -3;
+    squares[(int)stairDown.x][(int)stairDown.y].squareType = -2;
+  }
+
+
+  //fills in board with rooms
   public void genRooms() {
 
     //tries to place a room _roomTries times
     for (int i = 0; i < roomTries; i++) {
 
       //random top left corner location between 2 and width-2
-      int rx1 = (int)random(1, numSquares-3); 
-      int ry1 = (int)random(1, numSquares - 3);
+      int rx1 = (int)random(2, numSquares-5); 
+      int ry1 = (int)random(2, numSquares - 5);
 
       //makes room size
       int size = (int)random(minRoomSize, maxRoomSize);
@@ -108,7 +158,7 @@ class Floor {
       boolean overlaps = false;
 
       for (Room r : rooms) {
-        if (r.overlaps(newRoom)) {
+        if (r.overlaps(newRoom, numSquares)) {
           overlaps = true;
           r = null;
           break;
@@ -129,11 +179,13 @@ class Floor {
     }
   }
 
+
+  //fill in blank squares with a "perfect" maze
   public void genMaze() {
-    //generate maze :)
 
     PVector cur = new PVector(0, 0);
     Stack moveStack = new Stack();
+    notVisited = true;
 
     squares[(int)cur.x][(int)cur.y].squareType = 0;
     for (int x = 0; x<numSquares; x++) {
@@ -178,61 +230,70 @@ class Floor {
     }
     for (int i = 0; i<numSquares; i++) {
       for (int j = 0; j<numSquares; j++) {
-        if (i==numSquares-1 || j==numSquares-1 || i==0 || j==0) {
-          //squares[i][j].squareType = -1;
+        if (squares[i][j].squareType == -1 && squares[i][j].pathNeighbors(squares, numSquares) == 2) {
+          if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (squares[i-1][j].squareType==-1 && squares[i-2][j].squareType==0 && squares[i-2][j].region == squares[i][j].region) && random(1)<.01) {
+            squares[i-1][j].squareType = 0;
+            squares[i-1][j].region = squares[i][j].region;
+          } 
+          if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (squares[i+1][j].squareType==-1 && squares[i+2][j].squareType==0 && squares[i+2][j].region == squares[i][j].region) && random(1)<.01) {
+            squares[i+1][j].squareType = 0;
+            squares[i+1][j].region = squares[i][j].region;
+          }
+          if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (squares[i][j-1].squareType==-1 && squares[i][j-2].squareType==0 && squares[i][j-2].region == squares[i][j].region) && random(1)<.01) {
+            squares[i][j-1].squareType = 0;
+            squares[i][j-1].region = squares[i][j].region;
+          } 
+          if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (squares[i][j+1].squareType==-1 && squares[i][j+2].squareType==0 && squares[i][j+2].region == squares[i][j].region) && random(1)<.01) {
+            squares[i][j+1].squareType = 0;
+            squares[i][j+1].region = squares[i][j].region;
+          }
         }
       }
     }
-    /*for (int i = 1; i<numSquares-1; i++) {
-     for (int j = 1; j<numSquares-1; j++) {
-     if (squares[i][j].squareType ==0 && squares[i][j].neighbors(squares, numSquares)==2 && random(1)<.005) {
-     //squares[i][j].squareType = -1;
-     }
-     }
-     }*/
   }
 
+
+  //connects all regions with a door
   public void connectRegions() {
+
+    regions.get(0).connect();
 
     for (int i = 0; i<numSquares; i++) {
       for (int j = 0; j<numSquares; j++) {
-        if (squares[i][j].squareType == -1 && squares[i][j].connector(squares, regions, numSquares)) {
+        if (squares[i][j].squareType == -1 && squares[i][j].connector(regions)) {
           connectors.add(squares[i][j]);
-          squares[i][j].squareType = 5;
         }
       }
     }
 
     boolean allConnected = false;
-    ArrayList<Square> curSquare;
 
     while (!allConnected) {
       for (Region r : regions) {
-        if (!r.connected) {
-          ArrayList<Square> adjacent = new ArrayList<Square>();
-          curSquare = new ArrayList<Square>();
-          for (Square c : connectors) {
-            
-            if (c.adjacentTo(r) && !r.connected) {
-              
-              adjacent.add(c);
-              curSquare.add(c);
-            }
-          }
-          if (!adjacent.isEmpty()) {
-            connectors.remove(curSquare);
-            int temp = (int) random(adjacent.size());
-            adjacent.get(temp).squareType = -5;
-            adjacent.get(temp).region = r;
-            r.connect();
-            for (Square s : connectors) {
-              if (s.adjacentTo(r)) {
-                connectors.remove(s);
+        if (r.connected) {
+          if (!connectors.isEmpty()) {
+            int temp = (int) random(connectors.size());
+            connectors.get(temp).squareType = -5;
+            //r.connect();
+            for (Region u : regions) {
+              if (connectors.get(temp).adjacentTo(u)) {
+                u.connect();
               }
             }
           }
+          break;
         }
       }
+
+      connectors = new ArrayList<Square>();
+      for (int i = 0; i<numSquares; i++) {
+        for (int j = 0; j<numSquares; j++) {
+          if (squares[i][j].squareType == -1 && squares[i][j].connector(regions)) {
+            connectors.add(squares[i][j]);
+          }
+        }
+      }
+
       allConnected = true;
       for (Region r : regions) {
         if (!r.connected) {
@@ -240,14 +301,23 @@ class Floor {
         }
       }
     }
+
+    for (Region r : regions) {
+      for (Square s : r.children) {
+        s.region = r;
+      }
+    }
   }
 
+
+  //removes most dead ends
   public void sparseMaze() {
 
     boolean deadends = true;
 
     while (deadends) {
 
+      //remove all deadends (tile with 3 walls
       for (int i = 0; i<numSquares; i++) {
         for (int j = 0; j<numSquares; j++) {
           if (squares[i][j].deadend) {
@@ -257,20 +327,67 @@ class Floor {
         }
       }
 
+      //find new deadends with a 1% chance to ignore one
       for (int i = 0; i<numSquares; i++) {
         for (int j = 0; j<numSquares; j++) {
-          if (squares[i][j].squareType == 0 && squares[i][j].neighbors(squares, numSquares) < 2 && random(1)<.99) {
+          if (squares[i][j].squareType == 0 && squares[i][j].neighbors(squares, numSquares) < 2 && random(1)<.98) {
             squares[i][j].deadend = true;
           }
         }
       }
 
+      //check if there are any deadends left
       deadends = false;
       for (int i = 0; i<numSquares; i++) {
         for (int j = 0; j<numSquares; j++) {
           if (squares[i][j].squareType == 0 && squares[i][j].deadend) {
             deadends = true;
           }
+        }
+      }
+    }
+
+    //delete doors that lead to nothing
+    for (int i = 0; i<numSquares; i++) {
+      for (int j = 0; j<numSquares; j++) {
+        if (squares[i][j].squareType == -5 && squares[i][j].neighbors(squares, numSquares)<2) {
+          squares[i][j].squareType = -1;
+        }
+      }
+    }
+  }
+
+
+  //removes 3x3 detours and calls sparseMaze again
+  public void removeDetours() {
+    for (int i = 0; i<numSquares; i++) {
+      for (int j = 0; j<numSquares; j++) {
+        if (squares[i][j].squareType == -1 && squares[i][j].pathNeighbors(squares, numSquares) == 3 && squares[i][j].diagNeighbors(squares, numSquares)==4) {
+          squares[i][j].squareType = 5;
+          if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (squares[i-1][j].squareType==-1 || squares[i-1][j].squareType ==5)) {
+            squares[i-1][j].squareType = 0;
+            squares[i-1][j].region = squares[i][j].region;
+
+            squares[i+1][j].squareType = -1;
+          } else if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (squares[i+1][j].squareType==-1 || squares[i+1][j].squareType ==5)) {
+            squares[i+1][j].squareType = 0;
+            squares[i+1][j].region = squares[i][j].region;
+
+            squares[i-1][j].squareType = -1;
+          } else if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (squares[i][j-1].squareType==-1 || squares[i][j-1].squareType ==5)) {
+            squares[i][j-1].squareType = 0;
+            squares[i][j-1].region = squares[i][j].region;
+
+            squares[i][j+1].squareType = -1;
+          } else if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (squares[i][j+1].squareType==-1 || squares[i][j+1].squareType ==5)) {
+            squares[i][j+1].squareType = 0;
+            squares[i][j+1].region = squares[i][j].region;
+
+            squares[i][j-1].squareType = -1;
+          }
+          sparseMaze();
+        } else if (squares[i][j].squareType == 5) {
+          squares[i][j].squareType = -1;
         }
       }
     }

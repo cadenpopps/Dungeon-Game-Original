@@ -6,26 +6,27 @@ class Square {
   //up, right, down, left
   boolean deadend;
   int[] regionColor;
-  Region region = null;
+  Region region;
 
+  //new square stores location and diffifculty given by floor
   public Square(int x, int y, int dif, int type) {
 
-    //new square stores location and diffifculty given by floor
     locX = x;
     locY = y;
     difficulty = dif;
     squareType = type;
-    regionColor = new int[3];
-    regionColor[0] = 255;
-    regionColor[1] = 255;
-    regionColor[2] = 255;
     deadend = false;
+    region = null;
   }
 
+
+  //copies a Square
   public Square copy() {
     return(new Square(this.locX, this.locY, this.difficulty, this.squareType));
   }
 
+
+  //returns an arraylist of pvectors of moves (for maze)
   public ArrayList<PVector> moves(Square[][] squares, int numSquares) {
     ArrayList<PVector> moves = new ArrayList<PVector>();
     if (this.locX > 1 && squares[locX-1][locY].squareType == -1 && (locY)%2==1 && squares[locX-1][locY].neighbors(squares, numSquares)<2) {
@@ -43,6 +44,8 @@ class Square {
     return moves;
   }
 
+
+  //returns the number of neighbors, doors or paths
   public int neighbors(Square[][] squares, int numSquares) {
     int neighbors = 0;
 
@@ -62,69 +65,70 @@ class Square {
     return neighbors;
   }
 
-  public boolean connector(Square[][] squares, ArrayList<Region> regions, int numSquares) {
-    Region r1= null;
-    if (locX>1 && squares[locX-1][locY].squareType == 0) {
-      for (Region r : regions) {
-        for (Square s : r.children) {
-          if (s.equals(squares[locX-1][locY])) {
-            r1 = r;
-          }
-        }
-      }
+
+  //returns the number of diagonal neighbors
+  public int diagNeighbors(Square[][] squares, int numSquares) {
+    int neighbors = 0;
+
+    if (locX>0 && squares[locX-1][locY-1].squareType == 0) {
+      neighbors++;
     }
-    if (locX < numSquares-1 && squares[locX+1][locY].squareType == 0) {
-      for (Region r : regions) {
-        for (Square s : r.children) {
-          if (r1!=null) {
-            if (s.equals(squares[locX+1][locY])) {
-              if (r1!=r) {
-                return true;
-              }
-            }
-          }
-          if (s.equals(squares[locX+1][locY])) {
-            r1 = r;
-          }
-        }
-      }
+    if (locX<numSquares-2 && squares[locX+1][locY+1].squareType == 0) {
+      neighbors++;
     }
-    if (locY > 0 && squares[locX][locY-1].squareType == 0) {
-      for (Region r : regions) {
-        for (Square s : r.children) {
-          if (r1!=null) {
-            if (s.equals(squares[locX][locY-1])) {
-              if (r1!=r) {
-                return true;
-              }
-            }
-          }
-          if (s.equals(squares[locX][locY-1])) {
-            r1 = r;
-          }
-        }
-      }
+    if (locY>0 && squares[locX+1][locY-1].squareType == 0) {
+      neighbors++;
     }
-    if (locY < numSquares-1 && squares[locX][locY+1].squareType == 0) {
-      for (Region r : regions) {
-        for (Square s : r.children) {
-          if (r1!=null) {
-            if (s.equals(squares[locX][locY+1])) {
-              if (r1!=r) {
-                return true;
-              }
-            }
-          }
-          if (s.equals(squares[locX][locY+1])) {
-            r1 = r;
-          }
-        }
-      }
+    if (locY<numSquares-2 && squares[locX-1][locY+1].squareType == 0) {
+      neighbors++;
     }
 
+    return neighbors;
+  }
+
+
+  //return the number of path neighbors
+  public int pathNeighbors(Square[][] squares, int numSquares) {
+    int neighbors = 0;
+
+    if (locX>0 && squares[locX-1][locY].squareType == 0) {
+      neighbors++;
+    }
+    if (locX<numSquares-2 && squares[locX+1][locY].squareType == 0) {
+      neighbors++;
+    }
+    if (locY>0 && squares[locX][locY-1].squareType == 0) {
+      neighbors++;
+    }
+    if (locY<numSquares-2 && squares[locX][locY+1].squareType == 0) {
+      neighbors++;
+    }
+
+    return neighbors;
+  }
+
+
+  //returns true if this square should be a connector
+  public boolean connector(ArrayList<Region> regions) {
+
+    for (Region r : regions) {
+      if (r.connected) {
+        if (this.adjacentTo(r)) {
+          for (Region u : regions) {
+            if (!u.connected) {
+              if (this.adjacentTo(u)) {
+                return true;
+              }
+            }
+          }
+        }
+      }
+    }
     return false;
   }
 
+
+  //returns true if this square is adjacent to region
   public boolean adjacentTo(Region region) {
     boolean isAdjacent = false;
 

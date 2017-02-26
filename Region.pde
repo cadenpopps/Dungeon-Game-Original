@@ -2,31 +2,17 @@ class Region {
 
   boolean connected;
   ArrayList<Square> children;
-  int[] regionColor;
 
+
+  //makes a new region that is not connected, and has an arraylist of childsquares
   public Region(ArrayList<Square> childSquares) {
-
     connected = false;
     children = childSquares;
-    regionColor = new int[3];
-    regionColor[0] = (int)random(255);
-    regionColor[1] = (int)random(255);
-    regionColor[2] = (int)random(255);
-
-
-    for (Square s : children) {
-      s.regionColor = this.regionColor;
-    }
   }
 
+
+  //connects this region
   public void connect() {
     connected = true;
-    regionColor[0] = 255;
-    regionColor[1] = 255;
-    regionColor[2] = 255;
-
-    for (Square s : children) {
-      s.regionColor = this.regionColor;
-    }
   }
 }
