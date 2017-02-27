@@ -13,12 +13,12 @@ class Dungeon {
 
     for (int i = 0; i < numFloors; i++) {
       if (i>0) {
-        floors.add(new Floor(i, numSquares, floors.get(i-1).stairDown, delay));
+        floors.add(new Floor(i, numSquares, floors.get(i-1).stairDown, delay, numFloors));
       } else {
         PVector entrance = new PVector();
         entrance.x = (int)random(5,numSquares-5);
         entrance.y = (int)random(5,numSquares-5);
-        floors.add(new Floor(i, numSquares, entrance, delay));
+        floors.add(new Floor(i, numSquares, entrance, delay, numFloors));
       }
     }
   }

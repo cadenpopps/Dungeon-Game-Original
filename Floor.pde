@@ -3,29 +3,30 @@ import java.util.Stack;
 
 class Floor {
 
-  int floorNum, numSquares;
-  Square[][] squares;
+  int floorNum, numSquares, numFloors;
+  Square[][] board;
   PVector stairDown, stairUp;
   ArrayList<Room> rooms;
   ArrayList<Region> regions;
   ArrayList<Square> connectors;
   boolean notVisited;
   boolean showCreation;
-  final int roomTries = 500; 
-  int maxRoomSize, minRoomSize, roomOffSet;
+  int roomTries, maxRoomSize, minRoomSize, roomOffSet;
 
 
   //makes a new floor with a location, number of squares, an upStair, and arraylists of rooms, regions, and connectors
-  public Floor(int loc, int numSq, PVector stair, boolean delay) {
+  public Floor(int loc, int numSq, PVector stair, boolean delay, int _numFloors) {
 
     //new floor stores floor #, width/height of board, location of the up stair, and an collection of rooms
     floorNum = loc;
     numSquares = numSq;
+    numFloors = _numFloors; 
     stairUp = stair.copy();
     rooms = new ArrayList<Room>();
     regions = new ArrayList<Region>();
     connectors = new ArrayList<Square>();
     showCreation = delay;
+    roomTries = numSquares*3;
     maxRoomSize = (int)numSquares/4;
     minRoomSize = (int)maxRoomSize/4+1;
     roomOffSet = (int)minRoomSize/2+2;
@@ -43,31 +44,33 @@ class Floor {
   public void genBoard() {
 
     //initializes a new board
-    squares = new Square[numSquares][numSquares];
+    board = new Square[numSquares][numSquares];
 
     //initializes every square to a wall with a difficulty
     for (int i = 0; i<numSquares; i++) {
       for (int j = 0; j<numSquares; j++) {
         //needs difficulty (last param)
-        squares[i][j] = new Square(i, j, 0, -1);
+        board[i][j] = new Square(i, j, 0, -1);
       }
     }
 
     //create down stair
-    stairDown = new PVector((int)random(4, numSquares-4), (int)random(4, numSquares-4));
+    if (floorNum < numFloors-1) {
+      stairDown = new PVector((int)random(4, numSquares-4), (int)random(4, numSquares-4));
 
-    //check if up and down stair too close
-    while (abs(stairDown.x-stairUp.x) < numSquares/3 && abs(stairDown.y-stairUp.y) < numSquares/3) {
-      stairDown.x = (int)random(4, numSquares-4);
-      stairDown.y = (int)random(4, numSquares-4);
+      //check if up and down stair too close
+      while (abs(stairDown.x-stairUp.x) < numSquares/3 && abs(stairDown.y-stairUp.y) < numSquares/3) {
+        stairDown.x = (int)random(4, numSquares-4);
+        stairDown.y = (int)random(4, numSquares-4);
+      }
+      rooms.add(new Room((int)stairDown.x-(int)random(2, 4), (int)stairDown.y-(int)random(2, 4), (int)stairDown.x+(int)random(2, 4), (int)stairDown.y+(int)random(2, 4), numSquares));
     }
 
     //add 3x3 rooms around stairs
     rooms.add(new Room((int)stairUp.x-(int)random(2, 4), (int)stairUp.y-(int)random(2, 4), (int)stairUp.x+(int)random(2, 4), (int)stairUp.y+(int)random(2, 4), numSquares));
-    rooms.add(new Room((int)stairDown.x-(int)random(2, 4), (int)stairDown.y-(int)random(2, 4), (int)stairDown.x+(int)random(2, 4), (int)stairDown.y+(int)random(2, 4), numSquares));
 
     for (Room r : rooms) {
-      r.addChildren(squares);
+      r.addChildren(board);
       regions.add(new Region(r.childSquares));
     }
   }
@@ -81,18 +84,20 @@ class Floor {
     genMaze();
     connectRegions();
     sparseMaze();
-    removeDetours();
-    removeDetours();
-    //removeDetours();
+    for (int i = 0; i<(int)numSquares/20+1; i++) {
+      removeDetours();
+    }
 
     //makes sure stair locations aren't overwritten
-    squares[(int)stairUp.x][(int)stairUp.y].squareType = -3;
-    squares[(int)stairDown.x][(int)stairDown.y].squareType = -2;
+    board[(int)stairUp.x][(int)stairUp.y].squareType = -3;
+    if (floorNum<numFloors-1) {
+      board[(int)stairDown.x][(int)stairDown.y].squareType = -2;
+    }
 
     for (int i = 0; i<numSquares; i++) {
       for (int j = 0; j<numSquares; j++) {
-        if (squares[i][j].squareType == 5) {
-          squares[i][j].squareType = -1;
+        if (board[i][j].squareType == 5) {
+          board[i][j].squareType = -1;
         }
       }
     }
@@ -114,9 +119,9 @@ class Floor {
     } else if (step == 3) {
       sparseMaze();
     } else if (step == 4) {
-      removeDetours();
-    } else if (step == 5) {
-      removeDetours();
+      for (int i = 0; i<(int)numSquares/20+1; i++) {
+        removeDetours();
+      }
     } else if (step == 6) {
       rooms = null;
       regions = null;
@@ -124,8 +129,8 @@ class Floor {
     }
 
     //makes sure stair locations aren't overwritten
-    squares[(int)stairUp.x][(int)stairUp.y].squareType = -3;
-    squares[(int)stairDown.x][(int)stairDown.y].squareType = -2;
+    board[(int)stairUp.x][(int)stairUp.y].squareType = -3;
+    board[(int)stairDown.x][(int)stairDown.y].squareType = -2;
   }
 
 
@@ -136,8 +141,8 @@ class Floor {
     for (int i = 0; i < roomTries; i++) {
 
       //random top left corner location between 2 and width-2
-      int rx1 = (int)random(2, numSquares-5); 
-      int ry1 = (int)random(2, numSquares - 5);
+      int rx1 = (int)random(0, numSquares-3); 
+      int ry1 = (int)random(0, numSquares-3);
 
       //makes room size
       int size = (int)random(minRoomSize, maxRoomSize);
@@ -158,7 +163,7 @@ class Floor {
       boolean overlaps = false;
 
       for (Room r : rooms) {
-        if (r.overlaps(newRoom, numSquares)) {
+        if (r.overlaps(newRoom)) {
           overlaps = true;
           r = null;
           break;
@@ -169,13 +174,13 @@ class Floor {
       //if it doens't overlap, actually add new room
       if (!overlaps) {
         rooms.add(newRoom);
-        newRoom.addChildren(squares);
+        newRoom.addChildren(board);
         regions.add(new Region(newRoom.childSquares));
       }
     }
     //add all rooms to the board
     for (Room r : rooms) {
-      r.makeRoom(squares);
+      r.makeRoom(board);
     }
   }
 
@@ -187,19 +192,19 @@ class Floor {
     Stack moveStack = new Stack();
     notVisited = true;
 
-    squares[(int)cur.x][(int)cur.y].squareType = 0;
+    board[(int)cur.x][(int)cur.y].squareType = 0;
     for (int x = 0; x<numSquares; x++) {
       for (int y = 0; y<numSquares; y++) {
         if (x%2==1 || y%2==1) {
-          if (x>0 && y>0 && squares[x][y].squareType == -1 && squares[x][y].neighbors(squares, numSquares)<2 && squares[x-1][y].squareType == -1 && squares[x][y-1].squareType == -1) {
+          if (x>0 && y>0 && board[x][y].squareType == -1 && board[x][y].numNeighbors(board)<2 && board[x-1][y].squareType == -1 && board[x][y-1].squareType == -1) {
             ArrayList<Square> temp = new ArrayList<Square>();
             cur.x = x;
             cur.y = y;
             while (notVisited) {
 
-              squares[(int)cur.x][(int)cur.y].squareType = 0;
-              temp.add(squares[(int)cur.x][(int)cur.y]);
-              ArrayList<PVector> moves = squares[(int)cur.x][(int)cur.y].moves(squares, numSquares);
+              board[(int)cur.x][(int)cur.y].squareType = 0;
+              temp.add(board[(int)cur.x][(int)cur.y]);
+              ArrayList<PVector> moves = board[(int)cur.x][(int)cur.y].moves(board);
               if (!moves.isEmpty()) {
                 moveStack.push(cur);
                 //int randomMove = (int)random(0, moves.size());
@@ -216,7 +221,7 @@ class Floor {
               for (int i = 0; i<numSquares; i++) {
                 for (int j = 0; j<numSquares; j++) {
                   if (i%2==1 || j%2==1) {
-                    if (squares[i][j].squareType == -1) {
+                    if (board[i][j].squareType == -1) {
                       notVisited = true;
                     }
                   }
@@ -228,24 +233,43 @@ class Floor {
         }
       }
     }
+    for (Region r : regions) {
+      for (Square s : r.children) {
+        s.region = r;
+      }
+    }
     for (int i = 0; i<numSquares; i++) {
       for (int j = 0; j<numSquares; j++) {
-        if (squares[i][j].squareType == -1 && squares[i][j].pathNeighbors(squares, numSquares) == 2) {
-          if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (squares[i-1][j].squareType==-1 && squares[i-2][j].squareType==0 && squares[i-2][j].region == squares[i][j].region) && random(1)<.01) {
-            squares[i-1][j].squareType = 0;
-            squares[i-1][j].region = squares[i][j].region;
+        if (board[i][j].squareType == 0 && board[i][j].pathNeighbors(board, numSquares) == 2) {
+          if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (board[i-1][j].squareType==-1 && board[i-2][j].squareType==0 && board[i-2][j].region == board[i][j].region) && random(1)<.02) {
+            board[i-1][j].squareType = 0;
+            board[i-1][j].region = board[i][j].region;
           } 
-          if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (squares[i+1][j].squareType==-1 && squares[i+2][j].squareType==0 && squares[i+2][j].region == squares[i][j].region) && random(1)<.01) {
-            squares[i+1][j].squareType = 0;
-            squares[i+1][j].region = squares[i][j].region;
+          if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (board[i+1][j].squareType==-1 && board[i+2][j].squareType==0 && board[i+2][j].region == board[i][j].region) && random(1)<.02) {
+            board[i+1][j].squareType = 0;
+            board[i+1][j].region = board[i][j].region;
           }
-          if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (squares[i][j-1].squareType==-1 && squares[i][j-2].squareType==0 && squares[i][j-2].region == squares[i][j].region) && random(1)<.01) {
-            squares[i][j-1].squareType = 0;
-            squares[i][j-1].region = squares[i][j].region;
+          if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (board[i][j-1].squareType==-1 && board[i][j-2].squareType==0 && board[i][j-2].region == board[i][j].region) && random(1)<.02) {
+            board[i][j-1].squareType = 0;
+            board[i][j-1].region = board[i][j].region;
           } 
-          if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (squares[i][j+1].squareType==-1 && squares[i][j+2].squareType==0 && squares[i][j+2].region == squares[i][j].region) && random(1)<.01) {
-            squares[i][j+1].squareType = 0;
-            squares[i][j+1].region = squares[i][j].region;
+          if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (board[i][j+1].squareType==-1 && board[i][j+2].squareType==0 && board[i][j+2].region == board[i][j].region) && random(1)<.02) {
+            board[i][j+1].squareType = 0;
+            board[i][j+1].region = board[i][j].region;
+          }
+        }
+      }
+    }
+    for (int i = 0; i<numSquares; i++) {
+      for (int j = 0; j<numSquares; j++) {
+        if (board[i][j].squareType == -1 && board[i][j].pathNeighbors(board, numSquares) == 2) {
+          if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (board[i-1][j].squareType==0 && board[i+1][j].squareType==0 && board[i-1][j].region == board[i+1][j].region) && random(1)<.02) {
+            board[i][j].squareType = 0;
+            board[i][j].region = board[i][j].region;
+          } 
+          if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (board[i][j-1].squareType==0 && board[i][j+1].squareType==0 && board[i][j-1].region == board[i][j+1].region) && random(1)<.02) {
+            board[i][j].squareType = 0;
+            board[i][j].region = board[i][j].region;
           }
         }
       }
@@ -260,8 +284,8 @@ class Floor {
 
     for (int i = 0; i<numSquares; i++) {
       for (int j = 0; j<numSquares; j++) {
-        if (squares[i][j].squareType == -1 && squares[i][j].connector(regions)) {
-          connectors.add(squares[i][j]);
+        if (board[i][j].squareType == -1 && board[i][j].connector(regions)) {
+          connectors.add(board[i][j]);
         }
       }
     }
@@ -288,8 +312,8 @@ class Floor {
       connectors = new ArrayList<Square>();
       for (int i = 0; i<numSquares; i++) {
         for (int j = 0; j<numSquares; j++) {
-          if (squares[i][j].squareType == -1 && squares[i][j].connector(regions)) {
-            connectors.add(squares[i][j]);
+          if (board[i][j].squareType == -1 && board[i][j].connector(regions)) {
+            connectors.add(board[i][j]);
           }
         }
       }
@@ -320,9 +344,9 @@ class Floor {
       //remove all deadends (tile with 3 walls
       for (int i = 0; i<numSquares; i++) {
         for (int j = 0; j<numSquares; j++) {
-          if (squares[i][j].deadend) {
-            squares[i][j].deadend = false;
-            squares[i][j].squareType = -1;
+          if (board[i][j].deadend) {
+            board[i][j].deadend = false;
+            board[i][j].squareType = -1;
           }
         }
       }
@@ -330,8 +354,8 @@ class Floor {
       //find new deadends with a 1% chance to ignore one
       for (int i = 0; i<numSquares; i++) {
         for (int j = 0; j<numSquares; j++) {
-          if (squares[i][j].squareType == 0 && squares[i][j].neighbors(squares, numSquares) < 2 && random(1)<.98) {
-            squares[i][j].deadend = true;
+          if (board[i][j].squareType == 0 && board[i][j].numNeighbors(board) < 2 && random(1)<.98) {
+            board[i][j].deadend = true;
           }
         }
       }
@@ -340,7 +364,7 @@ class Floor {
       deadends = false;
       for (int i = 0; i<numSquares; i++) {
         for (int j = 0; j<numSquares; j++) {
-          if (squares[i][j].squareType == 0 && squares[i][j].deadend) {
+          if (board[i][j].squareType == 0 && board[i][j].deadend) {
             deadends = true;
           }
         }
@@ -350,8 +374,8 @@ class Floor {
     //delete doors that lead to nothing
     for (int i = 0; i<numSquares; i++) {
       for (int j = 0; j<numSquares; j++) {
-        if (squares[i][j].squareType == -5 && squares[i][j].neighbors(squares, numSquares)<2) {
-          squares[i][j].squareType = -1;
+        if (board[i][j].squareType == -5 && board[i][j].numNeighbors(board)<2) {
+          board[i][j].squareType = -1;
         }
       }
     }
@@ -362,34 +386,43 @@ class Floor {
   public void removeDetours() {
     for (int i = 0; i<numSquares; i++) {
       for (int j = 0; j<numSquares; j++) {
-        if (squares[i][j].squareType == -1 && squares[i][j].pathNeighbors(squares, numSquares) == 3 && squares[i][j].diagNeighbors(squares, numSquares)==4) {
-          squares[i][j].squareType = 5;
-          if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (squares[i-1][j].squareType==-1 || squares[i-1][j].squareType ==5)) {
-            squares[i-1][j].squareType = 0;
-            squares[i-1][j].region = squares[i][j].region;
+        if (board[i][j].squareType == -1 && board[i][j].pathNeighbors(board, numSquares) == 3 && board[i][j].diagNeighbors(board, numSquares)==4) {
+          board[i][j].squareType = 5;
+          if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (board[i-1][j].squareType==-1 || board[i-1][j].squareType ==5)) {
+            board[i-1][j].squareType = 0;
+            board[i-1][j].region = board[i][j].region;
 
-            squares[i+1][j].squareType = -1;
-          } else if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (squares[i+1][j].squareType==-1 || squares[i+1][j].squareType ==5)) {
-            squares[i+1][j].squareType = 0;
-            squares[i+1][j].region = squares[i][j].region;
+            board[i+1][j].squareType = -1;
+          } else if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (board[i+1][j].squareType==-1 || board[i+1][j].squareType ==5)) {
+            board[i+1][j].squareType = 0;
+            board[i+1][j].region = board[i][j].region;
 
-            squares[i-1][j].squareType = -1;
-          } else if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (squares[i][j-1].squareType==-1 || squares[i][j-1].squareType ==5)) {
-            squares[i][j-1].squareType = 0;
-            squares[i][j-1].region = squares[i][j].region;
+            board[i-1][j].squareType = -1;
+          } else if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (board[i][j-1].squareType==-1 || board[i][j-1].squareType ==5)) {
+            board[i][j-1].squareType = 0;
+            board[i][j-1].region = board[i][j].region;
 
-            squares[i][j+1].squareType = -1;
-          } else if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (squares[i][j+1].squareType==-1 || squares[i][j+1].squareType ==5)) {
-            squares[i][j+1].squareType = 0;
-            squares[i][j+1].region = squares[i][j].region;
+            board[i][j+1].squareType = -1;
+          } else if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (board[i][j+1].squareType==-1 || board[i][j+1].squareType ==5)) {
+            board[i][j+1].squareType = 0;
+            board[i][j+1].region = board[i][j].region;
 
-            squares[i][j-1].squareType = -1;
+            board[i][j-1].squareType = -1;
           }
-          sparseMaze();
-        } else if (squares[i][j].squareType == 5) {
-          squares[i][j].squareType = -1;
+        } else if (board[i][j].squareType == 5) {
+          board[i][j].squareType = -1;
         }
       }
     }
+    for (int i = 0; i<numSquares; i++) {
+      for (int j = 0; j<numSquares; j++) {
+        if (board[i][j].squareType == -1 && board[i][j].pathNeighbors(board, numSquares) == 4 && board[i][j].diagNeighbors(board, numSquares)==4 && random(1)<.8) {
+          ArrayList<Square> n = board[i][j].neighbors(board);
+          int temp = (int)random(0, n.size());
+          n.get(temp).squareType=-1;
+        }
+      }
+    }
+    sparseMaze();
   }
 }

@@ -5,9 +5,9 @@ class Region {
 
 
   //makes a new region that is not connected, and has an arraylist of childsquares
-  public Region(ArrayList<Square> childSquares) {
+  public Region(ArrayList<Square> _children) {
     connected = false;
-    children = childSquares;
+    children = _children;
   }
 
 
