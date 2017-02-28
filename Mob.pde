@@ -12,22 +12,22 @@ class Mob {
 
     switch(dir) {
     case 'u':
-      if (y>0 && dungeon.floors.get(currentFloor).board[(int)x][(int)y-1].squareType!=-1) {
+      if (y>0 && (dungeon.floors.get(currentFloor).board[(int)x][(int)y-1].squareType!=-1 && dungeon.floors.get(currentFloor).board[(int)x][(int)y-1].squareType!=2)) {
         y--;
       }
       break;
     case 'd':
-      if (y<dungeon.floors.get(currentFloor).numSquares-1 && dungeon.floors.get(currentFloor).board[(int)x][(int)y+1].squareType!=-1) {
+      if (y<dungeon.floors.get(currentFloor).numSquares-1 && (dungeon.floors.get(currentFloor).board[(int)x][(int)y+1].squareType!=-1 && dungeon.floors.get(currentFloor).board[(int)x][(int)y+1].squareType!=2)) {
         y++;
       }
       break;
     case 'l':
-      if (x>0 && dungeon.floors.get(currentFloor).board[(int)x-1][(int)y].squareType!=-1) {
+      if (x>0 && (dungeon.floors.get(currentFloor).board[(int)x-1][(int)y].squareType!=-1 && dungeon.floors.get(currentFloor).board[(int)x-1][(int)y].squareType!=2)) {
         x--;
       }
       break;
     case 'r':
-      if (x<dungeon.floors.get(currentFloor).numSquares-1 && dungeon.floors.get(currentFloor).board[(int)x+1][(int)y].squareType!=-1) {
+      if (x<dungeon.floors.get(currentFloor).numSquares-1 && (dungeon.floors.get(currentFloor).board[(int)x+1][(int)y].squareType!=-1 && dungeon.floors.get(currentFloor).board[(int)x+1][(int)y].squareType!=2)) {
         x++;
       }
       break;

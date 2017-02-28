@@ -87,6 +87,7 @@ class Floor {
     for (int i = 0; i<(int)numSquares/20+1; i++) {
       removeDetours();
     }
+    populate();
 
     //makes sure stair locations aren't overwritten
     board[(int)stairUp.x][(int)stairUp.y].squareType = -3;
@@ -123,6 +124,8 @@ class Floor {
         removeDetours();
       }
     } else if (step == 6) {
+      populate();
+    } else if (step == 7) {
       rooms = null;
       regions = null;
       connectors = null;
@@ -424,5 +427,56 @@ class Floor {
       }
     }
     sparseMaze();
+  }
+
+  public void populate() {
+    int lootMax, mobMax;
+    int numLoot, numMobs;
+    for (Room r : rooms) {
+      lootMax = constrain((int) (floorNum + r.rwidth)/2, 0, 4);
+      mobMax = r.rwidth / 5 +1;
+      numLoot = (int)random(0, lootMax);
+      numMobs = 0;
+
+      for (int a = 0; a<numLoot; a++) {
+        Square randomSquare = r.childSquares.get((int)random(r.childSquares.size()-1));
+        while (!(randomSquare.locX==r.x1 || randomSquare.locY==r.y1 || randomSquare.locX==r.x2 || randomSquare.locY==r.y2)) {
+          randomSquare = r.childSquares.get((int)random(r.childSquares.size()-1));
+        }
+        boolean create = true;
+        for (int i = randomSquare.locX-1; i<= randomSquare.locX+1; i++) {
+          for (int j = randomSquare.locY-1; j<=randomSquare.locY+1; j++) {
+            if (board[i][j].squareType==-5) {
+              create = false;
+            }
+          }
+        }
+        if (create) {
+          randomSquare.squareType = 2;
+        }
+      }
+
+      //for (Square s : r.childSquares) {
+
+      //  if (numLoot<lootMax && s.squareType == 0 && random(25)<(floorNum+5) && s.locX>3 && s.locX<numSquares-4 && s.locY>3 && s.locY<numSquares-4 && (s.locX==r.x1 || s.locY==r.y1 || s.locX==r.x2 || s.locY==r.y2)) {
+      //    boolean create = true;
+      //    for (int i = s.locX-1; i<=s.locX+1; i++) {
+      //      for (int j = s.locY-1; j<=s.locY+1; j++) {
+      //        if (board[i][j].squareType==-5) {
+      //          create = false;
+      //        }
+      //      }
+      //    }
+      //    if (create) {
+      //      s.squareType = 2;
+      //      numLoot++;
+      //    }
+      //  }
+      //  if (numMobs<mobMax && random(1)<.05) {
+      //    //s.squareType = 3;
+      //    //numLoot++;
+      //  }
+      //}
+    }
   }
 }

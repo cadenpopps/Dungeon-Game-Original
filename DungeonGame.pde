@@ -1,6 +1,6 @@
 
 Dungeon dungeon;
-int currentFloor, currentX, currentY, numSquares, squareSize;
+int currentFloor, currentX, currentY, numSquares, squareSize, numLoot;
 int floors, squares;
 int step = 0;
 int counter = 0, genCounter = 0, time = millis()+200, floorAnimationCounter = 0;
@@ -36,13 +36,7 @@ void draw() {
   //  if (genCounter == 1000) {
   //    //startUp();
   //  }
-  //}
-
-  //if (counter==1) {
-  //  startUp();   
-  //  counter = 0;
-  //}
-  //counter ++;
+  //}   
 
   player.update();
 
@@ -83,10 +77,18 @@ void draw() {
       else if (curSquare.squareType == 1) {
         fill(255, 100, 100);
       }
+      //loot
+      else if (curSquare.squareType == 2) {
+        fill(150, 100, 50);
+      } 
+      //mob placeHolder
+      else if (curSquare.squareType == 3) {
+        fill(150, 255, 50);
+      }
 
       //draw the square
       if (player.canSee.contains(curSquare)) {
-        rect(i*squareSize, j*squareSize, squareSize, squareSize);
+      rect(i*squareSize, j*squareSize, squareSize, squareSize);
       }
 
       if (player.x == i && player.y == j) {
@@ -105,6 +107,14 @@ void draw() {
     } else {
       if (floorAnimationCounter==31) {
         currentFloor++;
+        numLoot=0;
+        for (int i = 0; i<numSquares-1; i++) {
+          for (int j = 0; j<numSquares-1; j++) {
+            if (dungeon.floors.get(currentFloor).board[i][j].squareType==2) {
+              numLoot++;
+            }
+          }
+        }
       }
       fill(0, map(floorAnimationCounter, 30, 90, 255, 0));
       rect(0, 0, width, height);
@@ -118,6 +128,7 @@ void draw() {
   }
 
   fill(255);
+  text("Number Loot: " + (numLoot), width-180, height-120);
   text("Current Floor: " + (currentFloor+1), width-180, height-60);
 }
 
@@ -199,12 +210,13 @@ void startUp() {
   //need random number of floors
   genCounter = 0;
   //floors = (int)random(7, 10);
-  floors = 10;
+  floors = 9;
   //squares = (int)random(100, 150);
-  squares = 25;
+  squares = 40;
   if (squares%2==0) {
     squares--;
   }
+  numLoot = 0;
 
   numSquares = squares;
   squareSize = (height-100)/numSquares;
@@ -217,6 +229,14 @@ void startUp() {
   for (Floor f : dungeon.floors) {
     if (f.floorNum<f.numFloors-1 && !findPath(dungeon.floors.get(f.floorNum).stairDown, dungeon.floors.get(f.floorNum).stairUp, dungeon.floors.get(f.floorNum).board)) {
       startUp();
+    }
+  }
+
+  for (int i = 0; i<numSquares-1; i++) {
+    for (int j = 0; j<numSquares-1; j++) {
+      if (dungeon.floors.get(currentFloor).board[i][j].squareType==2) {
+        numLoot++;
+      }
     }
   }
 
@@ -261,12 +281,12 @@ void keyPressed() {
 void mousePressed() {
 
   if (mouseButton == LEFT) {
-    //if (currentFloor<floors-1) {
-    //  currentFloor++;
-    //} else {
-    //  currentFloor = 0;
-    //}
-    //genCounter = 0;
+    if (currentFloor<floors-1) {
+      nextFloorAnimation = true;
+    } else {
+      currentFloor = 0;
+    }
+    genCounter = 0;
   }
 
   if (mouseButton == RIGHT) {
