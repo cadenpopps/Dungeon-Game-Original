@@ -115,6 +115,9 @@ void draw() {
         //draw the square
         if (curSquareType!=-1 && curSquareType!=0) {
           rect(i*squareSize, j*squareSize, squareSize, squareSize);
+        } else {
+          //fill(0, 100);
+          //rect(i*squareSize, j*squareSize, squareSize, squareSize);
         }
         if (player.x == i && player.y == j) {
           //stroke(0);
@@ -161,6 +164,9 @@ void draw() {
         }
 
         if (curSquareType!=-1 && curSquareType!=0) {
+          rect(i*squareSize, j*squareSize, squareSize, squareSize);
+        } else {
+          fill(0, 100);
           rect(i*squareSize, j*squareSize, squareSize, squareSize);
         }
         if (player.x == i && player.y == j) {
