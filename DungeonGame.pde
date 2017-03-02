@@ -4,18 +4,33 @@ int currentFloor, currentX, currentY, numSquares, squareSize, numLoot;
 int floors, squares;
 int step = 0;
 int counter = 0, genCounter = 0, time = millis()+200, floorAnimationCounter = 0;
-boolean delay = false;
-boolean nextFloorAnimation = false;
+boolean delay = false, nextFloorAnimation = false;
 Player player;
-
+char moving = ' ';
+int moves= 0;
+ArrayList<PImage> wallTextures;
+ArrayList<PImage> floorTextures;
 
 void setup() {
 
   size(1000, 800);
   //fullScreen(P2D, 2);
 
+  wallTextures = new ArrayList<PImage>();
+  wallTextures.add(loadImage("assets/wallTexture0.jpg"));
+  //wallTextures.add(loadImage("assets/wallTexture1.jpg"));
+  //wallTextures.add(loadImage("assets/wallTexture2.jpg"));
+  //wallTextures.add(loadImage("assets/wallTexture3.jpg"));
+  //wallTextures.add(loadImage("assets/wallTexture4.jpg"));
+
+  floorTextures = new ArrayList<PImage>();
+  floorTextures.add(loadImage("assets/floorTexture0.jpg"));
+  //floorTextures.add(loadImage("assets/floorTexture1.jpg"));
+  //floorTextures.add(loadImage("assets/floorTexture2.jpg"));
+
   frameRate(60);
 
+  noStroke();
   textSize(20);
   startUp();
 }
@@ -38,6 +53,13 @@ void draw() {
   //  }
   //}   
 
+  if (moves>0) {
+    if (moves%3 ==0) {
+      player.move(moving, true);
+    }
+    moves--;
+  }
+
   player.update();
 
   background(50-(currentFloor*2));
@@ -51,50 +73,101 @@ void draw() {
       //current squareType
       int curSquareType = curSquare.squareType;
       //defualt stroke
-      stroke(50-(currentFloor*2), 50);
-      //walls
-      if (curSquareType==-1) {
-        fill(50-(currentFloor*2));
-        stroke(50-(currentFloor*2));
-      } 
-      //paths
-      else if (curSquareType == 0) {
-        fill(250-(currentFloor*5), 245-(currentFloor*5), 240-(currentFloor*5));
-      } 
-      //downStair
-      else if (curSquare.squareType==-2) {
-        fill(150, 0, 0);
-      } 
-      //upStair
-      else if (curSquare.squareType ==-3) {
-        fill(0, 150, 0);
-      } 
-      //door
-      else if (curSquare.squareType == -5) {
-        fill(227, 155, 57);
-      }
-      //visited
-      else if (curSquare.squareType == 1) {
-        fill(255, 100, 100);
-      }
-      //loot
-      else if (curSquare.squareType == 2) {
-        fill(150, 100, 50);
-      } 
-      //mob placeHolder
-      else if (curSquare.squareType == 3) {
-        fill(150, 255, 50);
-      }
+      //stroke(50-(currentFloor*2), 50);
 
-      //draw the square
       if (player.canSee.contains(curSquare)) {
-      rect(i*squareSize, j*squareSize, squareSize, squareSize);
-      }
+        //walls
+        if (curSquareType==-1) {
+          //fill(50-(currentFloor*2));
+          //stroke(50-(currentFloor*2));
+          image(curSquare.texture, i*squareSize, j*squareSize, squareSize, squareSize);
+        } 
+        //paths
+        else if (curSquareType == 0) {
+          image(curSquare.texture, i*squareSize, j*squareSize, squareSize, squareSize);
+          //fill(250-(currentFloor*5), 245-(currentFloor*5), 240-(currentFloor*5));
+        } 
+        //downStair
+        else if (curSquare.squareType==-2) {
+          fill(150, 0, 0);
+        } 
+        //upStair
+        else if (curSquare.squareType ==-3) {
+          fill(0, 150, 0);
+        } 
+        //door
+        else if (curSquare.squareType == -5) {
+          fill(100, 50, 20);
+        }
+        //visited
+        else if (curSquare.squareType == 1) {
+          fill(255, 100, 100);
+        }
+        //loot
+        else if (curSquare.squareType == 2) {
+          fill(255, 50, 50);
+        } 
+        //mob placeHolder
+        else if (curSquare.squareType == 3) {
+          fill(150, 255, 50);
+        }
 
-      if (player.x == i && player.y == j) {
-        stroke(0);
-        fill(255, 255, 255, 180);
-        rect(i*squareSize+3, j*squareSize+3, squareSize-6, squareSize-6);
+        //draw the square
+        if (curSquareType!=-1 && curSquareType!=0) {
+          rect(i*squareSize, j*squareSize, squareSize, squareSize);
+        }
+        if (player.x == i && player.y == j) {
+          //stroke(0);
+          fill(20, 20, 20, 180);
+          rect(i*squareSize+(squareSize/4), j*squareSize+(squareSize/4), squareSize/2, squareSize/2);
+        } else if (curSquare.containsMob) {
+          //stroke(255, 0);
+          fill(255, 100, 0, 180);
+          rect(i*squareSize+(squareSize/8), j*squareSize+(squareSize/8), squareSize/1.25, squareSize/1.25);
+        }
+      } else if (player.hasSeen.contains(curSquare)) {
+
+        //walls
+        if (curSquareType==-1) {
+          image(curSquare.texture, i*squareSize, j*squareSize, squareSize, squareSize);
+        } 
+        //paths
+        else if (curSquareType == 0) {
+          image(curSquare.texture, i*squareSize, j*squareSize, squareSize, squareSize);
+        } 
+        //downStair
+        else if (curSquare.squareType==-2) {
+          fill(150, 0, 0, 100);
+        } 
+        //upStair
+        else if (curSquare.squareType ==-3) {
+          fill(0, 150, 0, 100);
+        } 
+        //door
+        else if (curSquare.squareType == -5) {
+          fill(100, 50, 20, 100);
+        }
+        //visited
+        else if (curSquare.squareType == 1) {
+          fill(255, 100, 100, 100);
+        }
+        //loot
+        else if (curSquare.squareType == 2) {
+          fill(255, 50, 50, 100);
+        } 
+        //mob placeHolder
+        else if (curSquare.squareType == 3) {
+          fill(150, 255, 50, 100);
+        }
+
+        if (curSquareType!=-1 && curSquareType!=0) {
+          rect(i*squareSize, j*squareSize, squareSize, squareSize);
+        }
+        if (player.x == i && player.y == j) {
+          //stroke(0);
+          fill(200, 200, 200, 180);
+          rect(i*squareSize+(squareSize/4), j*squareSize+(squareSize/4), squareSize/2, squareSize/2);
+        }
       }
     }
   }
@@ -212,7 +285,7 @@ void startUp() {
   //floors = (int)random(7, 10);
   floors = 9;
   //squares = (int)random(100, 150);
-  squares = 40;
+  squares = 20;
   if (squares%2==0) {
     squares--;
   }
@@ -229,6 +302,16 @@ void startUp() {
   for (Floor f : dungeon.floors) {
     if (f.floorNum<f.numFloors-1 && !findPath(dungeon.floors.get(f.floorNum).stairDown, dungeon.floors.get(f.floorNum).stairUp, dungeon.floors.get(f.floorNum).board)) {
       startUp();
+    }
+    for (int i = 0; i<numSquares; i++) {
+      for (int j = 0; j<numSquares; j++) {
+        if (dungeon.floors.get(f.floorNum).board[i][j].squareType==-1) {
+          dungeon.floors.get(f.floorNum).board[i][j].texture = wallTextures.get((int)random(wallTextures.size()));
+        }
+        if (dungeon.floors.get(f.floorNum).board[i][j].squareType==0) {
+          dungeon.floors.get(f.floorNum).board[i][j].texture = floorTextures.get((int)random(floorTextures.size()));
+        }
+      }
     }
   }
 
@@ -247,31 +330,48 @@ void keyPressed() {
   if (key != CODED) {
     switch(key) {
     case 'w': 
-      player.move('u');
+      player.move('u', true);
       break;
     case 'a': 
-      player.move('l');
+      player.move('l', true);
       break;
     case 's': 
-      player.move('d');
+      player.move('d', true);
       break;
     case 'd': 
-      player.move('r');
+      player.move('r', true);
+      break;
+
+    case 'W': 
+      moving = 'u';
+      moves = 6;
+      break;
+    case 'A': 
+      moving ='l';
+      moves = 6;
+      break;
+    case 'S': 
+      moving = 'd';
+      moves = 6;
+      break;
+    case 'D': 
+      moving = 'r';
+      moves = 6;
       break;
     }
   } else {
     switch(keyCode) {
     case UP: 
-      player.move('u');
+      player.move('u', true);
       break;
     case RIGHT: 
-      player.move('r');
+      player.move('r', true);
       break;
     case DOWN: 
-      player.move('d');
+      player.move('d', true);
       break;
     case LEFT: 
-      player.move('l');
+      player.move('l', true);
       break;
     }
   }
@@ -281,12 +381,12 @@ void keyPressed() {
 void mousePressed() {
 
   if (mouseButton == LEFT) {
-    if (currentFloor<floors-1) {
-      nextFloorAnimation = true;
-    } else {
-      currentFloor = 0;
-    }
-    genCounter = 0;
+    //if (currentFloor<floors-1) {
+    //  nextFloorAnimation = true;
+    //} else {
+    //  currentFloor = 0;
+    //}
+    //genCounter = 0;
   }
 
   if (mouseButton == RIGHT) {

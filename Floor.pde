@@ -12,6 +12,7 @@ class Floor {
   boolean notVisited;
   boolean showCreation;
   int roomTries, maxRoomSize, minRoomSize, roomOffSet;
+  ArrayList<Mob> mobs;
 
 
   //makes a new floor with a location, number of squares, an upStair, and arraylists of rooms, regions, and connectors
@@ -25,8 +26,9 @@ class Floor {
     rooms = new ArrayList<Room>();
     regions = new ArrayList<Region>();
     connectors = new ArrayList<Square>();
+    mobs = new ArrayList<Mob>();
     showCreation = delay;
-    roomTries = numSquares*3;
+    roomTries = numSquares*20;
     maxRoomSize = (int)numSquares/4;
     minRoomSize = (int)maxRoomSize/4+1;
     roomOffSet = (int)minRoomSize/2+2;
@@ -72,6 +74,7 @@ class Floor {
     for (Room r : rooms) {
       r.addChildren(board);
       regions.add(new Region(r.childSquares));
+      r.roomType = -1;
     }
   }
 
@@ -301,9 +304,8 @@ class Floor {
           if (!connectors.isEmpty()) {
             int temp = (int) random(connectors.size());
             connectors.get(temp).squareType = -5;
-            //r.connect();
             for (Region u : regions) {
-              if (connectors.get(temp).adjacentTo(u)) {
+              if (connectors.get(temp).adjacentTo(u) && random(1)<.90) {
                 u.connect();
               }
             }
@@ -354,10 +356,10 @@ class Floor {
         }
       }
 
-      //find new deadends with a 1% chance to ignore one
+      //find new deadends with a 3% chance to ignore one
       for (int i = 0; i<numSquares; i++) {
         for (int j = 0; j<numSquares; j++) {
-          if (board[i][j].squareType == 0 && board[i][j].numNeighbors(board) < 2 && random(1)<.98) {
+          if (board[i][j].squareType == 0 && board[i][j].numNeighbors(board) < 2 && random(1)<.97) {
             board[i][j].deadend = true;
           }
         }
@@ -375,13 +377,16 @@ class Floor {
     }
 
     //delete doors that lead to nothing
-    for (int i = 0; i<numSquares; i++) {
-      for (int j = 0; j<numSquares; j++) {
-        if (board[i][j].squareType == -5 && board[i][j].numNeighbors(board)<2) {
-          board[i][j].squareType = -1;
-        }
-      }
-    }
+    //for (int i = 0; i<numSquares; i++) {
+    //  for (int j = 0; j<numSquares; j++) {
+    //    if (board[i][j].squareType == -5 && board[i][j].numNeighbors(board)<2) {
+    //      board[i][j].squareType = -1;
+    //    }
+    //    if (board[i][j].squareType == -5 && random(1)<.1) {
+    //      board[i][j].squareType = 0;
+    //    }
+    //  }
+    //}
   }
 
 
@@ -433,10 +438,13 @@ class Floor {
     int lootMax, mobMax;
     int numLoot, numMobs;
     for (Room r : rooms) {
+      if (r.roomType == -1) {
+        continue;
+      }
       lootMax = constrain((int) (floorNum + r.rwidth)/2, 0, 4);
-      mobMax = r.rwidth / 5 +1;
+      mobMax = (int)constrain((r.rwidth)/3 + (floorNum/3), 0, 4);
       numLoot = (int)random(0, lootMax);
-      numMobs = 0;
+      numMobs = (int)random(0, mobMax);
 
       for (int a = 0; a<numLoot; a++) {
         Square randomSquare = r.childSquares.get((int)random(r.childSquares.size()-1));
@@ -456,27 +464,36 @@ class Floor {
         }
       }
 
-      //for (Square s : r.childSquares) {
+      for (int a = 0; a<numMobs; a++) {
+        Square randomSquare = r.childSquares.get((int)random(r.childSquares.size()-1));
+        boolean create = true;
+        for (int i = randomSquare.locX-1; i<= randomSquare.locX+1; i++) {
+          for (int j = randomSquare.locY-1; j<=randomSquare.locY+1; j++) {
+            if (board[i][j].squareType==-5) {
+              create = false;
+            }
+          }
+        }
+        if (create) {
+          mobs.add(new Mob(randomSquare.locX, randomSquare.locY));
+          randomSquare.containsMob = true;
+        }
+      }
+    }
 
-      //  if (numLoot<lootMax && s.squareType == 0 && random(25)<(floorNum+5) && s.locX>3 && s.locX<numSquares-4 && s.locY>3 && s.locY<numSquares-4 && (s.locX==r.x1 || s.locY==r.y1 || s.locX==r.x2 || s.locY==r.y2)) {
-      //    boolean create = true;
-      //    for (int i = s.locX-1; i<=s.locX+1; i++) {
-      //      for (int j = s.locY-1; j<=s.locY+1; j++) {
-      //        if (board[i][j].squareType==-5) {
-      //          create = false;
-      //        }
-      //      }
-      //    }
-      //    if (create) {
-      //      s.squareType = 2;
-      //      numLoot++;
-      //    }
-      //  }
-      //  if (numMobs<mobMax && random(1)<.05) {
-      //    //s.squareType = 3;
-      //    //numLoot++;
-      //  }
-      //}
+    //delete doors that lead to nothing
+    for (int i = 0; i<numSquares; i++) {
+      for (int j = 0; j<numSquares; j++) {
+        if (board[i][j].squareType == -5 && board[i][j].numNeighbors(board)<2) {
+          board[i][j].squareType = -1;
+        }
+        if (board[i][j].squareType == -5 && random(1)<.1) {
+          board[i][j].squareType = 0;
+        }
+        if (board[i][j].squareType == -1 && board[i][j].pathNeighbors(board, numSquares)>2) {
+          board[i][j].squareType = 0;
+        }
+      }
     }
   }
 }

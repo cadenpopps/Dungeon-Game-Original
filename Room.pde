@@ -3,12 +3,15 @@ class Room {
   int x1, y1, x2, y2;
   int rwidth, rheight;
   int parentFloor;
+  int roomType;
   ArrayList<Square> childSquares;
 
 
   //makes a new room that has a position for top left corner and bottom right corner
   public Room(int _x1, int _y1, int _x2, int _y2, int numSquares) {
 
+    roomType = 0;
+    
     x1 = _x1;
     y1 = _y1;
     x2 = _x2;

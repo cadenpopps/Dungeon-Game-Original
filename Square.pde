@@ -7,6 +7,8 @@ class Square {
   boolean deadend;
   int[] regionColor;
   Region region;
+  boolean containsMob;
+  PImage texture;
 
   //new square stores location and diffifculty given by floor
   public Square(int x, int y, int dif, int type) {
@@ -17,6 +19,8 @@ class Square {
     squareType = type;
     deadend = false;
     region = null;
+    containsMob = false;
+    texture = null;
   }
 
 
