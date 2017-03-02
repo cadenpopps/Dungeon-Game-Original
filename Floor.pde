@@ -436,17 +436,17 @@ class Floor {
 
   public void populate() {
     int lootMax, mobMax;
-    int numLoot, numMobs;
+    //int numLoot, numMobs;
     for (Room r : rooms) {
       if (r.roomType == -1) {
         continue;
       }
-      lootMax = constrain((int) (floorNum + r.rwidth)/2, 0, 4);
-      mobMax = (int)constrain((r.rwidth)/3 + (floorNum/3), 0, 4);
-      numLoot = (int)random(0, lootMax);
-      numMobs = (int)random(0, mobMax);
+      lootMax = constrain((int)random(floorNum+2), 0, r.rwidth/3);
+      mobMax = constrain((int)random(floorNum+2), 0, r.rwidth/3);
+      //numLoot = 0;
+      //numMobs = 0;
 
-      for (int a = 0; a<numLoot; a++) {
+      for (int a = 0; a<lootMax; a++) {
         Square randomSquare = r.childSquares.get((int)random(r.childSquares.size()-1));
         while (!(randomSquare.locX==r.x1 || randomSquare.locY==r.y1 || randomSquare.locX==r.x2 || randomSquare.locY==r.y2)) {
           randomSquare = r.childSquares.get((int)random(r.childSquares.size()-1));
@@ -464,7 +464,7 @@ class Floor {
         }
       }
 
-      for (int a = 0; a<numMobs; a++) {
+      for (int a = 0; a<mobMax; a++) {
         Square randomSquare = r.childSquares.get((int)random(r.childSquares.size()-1));
         boolean create = true;
         for (int i = randomSquare.locX-1; i<= randomSquare.locX+1; i++) {

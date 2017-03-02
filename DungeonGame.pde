@@ -11,6 +11,12 @@ int moves= 0;
 ArrayList<PImage> wallTextures;
 ArrayList<PImage> floorTextures;
 
+
+//grass restricts vision, breaks when you walk on it, has loot?
+//food- turn based, steps deduct food value
+//treasure chests for loot
+//monsters or treassure chests drop food
+
 void setup() {
 
   size(1000, 800);
@@ -333,52 +339,54 @@ void startUp() {
 }
 
 void keyPressed() {
-  if (key != CODED) {
-    switch(key) {
-    case 'w': 
-      player.move('u', true);
-      break;
-    case 'a': 
-      player.move('l', true);
-      break;
-    case 's': 
-      player.move('d', true);
-      break;
-    case 'd': 
-      player.move('r', true);
-      break;
+  if (floorAnimationCounter==0) {
+    if (key != CODED) {
+      switch(key) {
+      case 'w': 
+        player.move('u', true);
+        break;
+      case 'a': 
+        player.move('l', true);
+        break;
+      case 's': 
+        player.move('d', true);
+        break;
+      case 'd': 
+        player.move('r', true);
+        break;
 
-    case 'W': 
-      moving = 'u';
-      moves = 6;
-      break;
-    case 'A': 
-      moving ='l';
-      moves = 6;
-      break;
-    case 'S': 
-      moving = 'd';
-      moves = 6;
-      break;
-    case 'D': 
-      moving = 'r';
-      moves = 6;
-      break;
-    }
-  } else {
-    switch(keyCode) {
-    case UP: 
-      player.move('u', true);
-      break;
-    case RIGHT: 
-      player.move('r', true);
-      break;
-    case DOWN: 
-      player.move('d', true);
-      break;
-    case LEFT: 
-      player.move('l', true);
-      break;
+      case 'W': 
+        moving = 'u';
+        moves = 6;
+        break;
+      case 'A': 
+        moving ='l';
+        moves = 6;
+        break;
+      case 'S': 
+        moving = 'd';
+        moves = 6;
+        break;
+      case 'D': 
+        moving = 'r';
+        moves = 6;
+        break;
+      }
+    } else {
+      switch(keyCode) {
+      case UP: 
+        player.move('u', true);
+        break;
+      case RIGHT: 
+        player.move('r', true);
+        break;
+      case DOWN: 
+        player.move('d', true);
+        break;
+      case LEFT: 
+        player.move('l', true);
+        break;
+      }
     }
   }
 }
