@@ -23,14 +23,14 @@ void setup() {
   //fullScreen(P2D, 2);
 
   wallTextures = new ArrayList<PImage>();
-  wallTextures.add(loadImage("assets/wallTexture0.jpg"));
+  wallTextures.add(loadImage("data/wallTexture0.jpg"));
   //wallTextures.add(loadImage("assets/wallTexture1.jpg"));
   //wallTextures.add(loadImage("assets/wallTexture2.jpg"));
   //wallTextures.add(loadImage("assets/wallTexture3.jpg"));
   //wallTextures.add(loadImage("assets/wallTexture4.jpg"));
 
   floorTextures = new ArrayList<PImage>();
-  floorTextures.add(loadImage("assets/floorTexture0.jpg"));
+  floorTextures.add(loadImage("data/floorTexture0.jpg"));
   //floorTextures.add(loadImage("assets/floorTexture1.jpg"));
   //floorTextures.add(loadImage("assets/floorTexture2.jpg"));
 
@@ -295,9 +295,9 @@ void startUp() {
   //need random number of floors
   genCounter = 0;
   //floors = (int)random(7, 10);
-  floors = 9;
+  floors = 15;
   //squares = (int)random(100, 150);
-  squares = 20;
+  squares = 30;
   if (squares%2==0) {
     squares--;
   }
