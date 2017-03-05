@@ -29,7 +29,7 @@ class Floor {
     mobs = new ArrayList<Mob>();
     showCreation = delay;
     roomTries = numSquares*20;
-    maxRoomSize = (int)numSquares/4;
+    maxRoomSize = 13;
     minRoomSize = (int)maxRoomSize/4+1;
     roomOffSet = (int)minRoomSize/2+2;
 
@@ -234,7 +234,9 @@ class Floor {
                 }
               }
             }
-            regions.add(new Region(temp));
+            Region r = new Region(temp);
+            r.path = true;
+            regions.add(r);
           }
         }
       }
@@ -487,11 +489,22 @@ class Floor {
         if (board[i][j].squareType == -5 && board[i][j].numNeighbors(board)<2) {
           board[i][j].squareType = -1;
         }
-        if (board[i][j].squareType == -5 && random(1)<.1) {
+        if (board[i][j].squareType == -5 && random(1)<.15) {
           board[i][j].squareType = 0;
         }
         if (board[i][j].squareType == -1 && board[i][j].pathNeighbors(board, numSquares)>2) {
           board[i][j].squareType = 0;
+        }
+        if (board[i][j].squareType == -5) {
+          for (int a = i-1; a<=i+1; a++) {
+            for (int b = j-1; b<=j+1; b++) {
+              if (a>0 && b>0 && a<numSquares-1 && b<numSquares-1 && (a!=i || b!=j)) {
+                if (board[a][b].squareType == -5 && random(1)<.9) {
+                  board[a][b].squareType = -1;
+                }
+              }
+            }
+          }
         }
       }
     }

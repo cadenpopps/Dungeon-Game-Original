@@ -9,6 +9,8 @@ class Square {
   Region region;
   boolean containsMob;
   PImage texture;
+  int lightLevel;
+  boolean isOpen;
 
   //new square stores location and diffifculty given by floor
   public Square(int x, int y, int dif, int type) {
@@ -21,12 +23,19 @@ class Square {
     region = null;
     containsMob = false;
     texture = null;
+    lightLevel = 0;
+    isOpen = false;
   }
 
 
   //copies a Square
   public Square copy() {
-    return(new Square(this.locX, this.locY, this.difficulty, this.squareType));
+    Square s = new Square(this.locX, this.locY, this.difficulty, this.squareType);
+    s.region = this.region;
+    s.containsMob = this.containsMob;
+    s.texture = this.texture;
+    s.lightLevel = this.lightLevel;
+    return s;
   }
 
 
@@ -87,7 +96,7 @@ class Square {
     if (locY<numSquares-2 && (board[locX][locY+1].squareType == 0 || board[locX][locY+1].squareType == -5 || board[locX][locY+1].squareType == -2)) {
       neighbors.add(board[locX][locY+1]);
     }
-    
+
     //println(neighbors.size());
 
     return neighbors;

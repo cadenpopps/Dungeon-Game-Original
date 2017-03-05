@@ -1,15 +1,17 @@
-
 Dungeon dungeon;
-int currentFloor, currentX, currentY, numSquares, squareSize, numLoot;
+int currentFloor, numSquares, squareSize, numLoot;
 int floors, squares;
 int step = 0;
 int counter = 0, genCounter = 0, time = millis()+200, floorAnimationCounter = 0;
-boolean delay = false, nextFloorAnimation = false;
+boolean delay = false, nextFloorAnimation = false, firstFloorAnimation = false;
 Player player;
 char moving = ' ';
 int moves= 0;
+int loading = 0;
+int moveCooldown;
 ArrayList<PImage> wallTextures;
 ArrayList<PImage> floorTextures;
+PImage playerTexture;
 
 
 //grass restricts vision, breaks when you walk on it, has loot?
@@ -34,190 +36,328 @@ void setup() {
   //floorTextures.add(loadImage("assets/floorTexture1.jpg"));
   //floorTextures.add(loadImage("assets/floorTexture2.jpg"));
 
+  playerTexture = loadImage("data/playerTexture.png");
+
   frameRate(60);
 
-  noStroke();
-  textSize(20);
-  startUp();
+  loading = 10;
 }
 
 void draw() {
 
-  //if (findPath(dungeon.floors.get(currentFloor).stairDown, dungeon.floors.get(currentFloor).stairUp, dungeon.floors.get(currentFloor).squares)) {
-  //  startUp();
-  //} else {
-  //  print("fail");
-  //  startUp();
-  //}
-
-  //if (delay && millis()>time) {
-  //  time = millis()+50;
-  //  dungeon.floors.get(currentFloor).genDungeon(genCounter); 
-  //  genCounter++;
-  //  if (genCounter == 1000) {
-  //    //startUp();
-  //  }
-  //}   
-
-  if (moves>0) {
-    if (moves%3 ==0) {
-      player.move(moving, true);
-    }
-    moves--;
+  if (loading >= 2) {
+    textSize(100);
+    textAlign(CENTER);
+    fill(map(loading, 10, 2, 50, 0));
+    rect(0, 0, width, height);
+    fill(255);
+    text("Loading...", 0, height/2-100, width, height/2);
+    loading--;
   }
+  if (loading == 1) {
+    noStroke();
+    fill(map(loading, 10, 2, 50, 0));
+    rect(0, 0, width, height);
+    fill(255);
+    text("Loading...", 0, height/2-100, width, height/2);
+    textAlign(LEFT);
+    textSize(20);
+    startUp();
+    loading--;
+    firstFloorAnimation = true;
+  }
+  if (loading == 0) {
 
-  player.update();
+    if (moveCooldown>0) {
+      moveCooldown--;
+    }
+    if (moves>0) {
+      if (moves%3 ==0) {
+        player.move(moving, true);
+      }
+      moves--;
+    }
 
-  background(50-(currentFloor*2));
+    background(0);
 
-  pushMatrix();
-  translate(50, 50);
-  for (int i = 0; i < numSquares; i++) {
-    for (int j = 0; j < numSquares; j++) {
-      //current square
-      Square curSquare = dungeon.floors.get(currentFloor).board[i][j];
-      //current squareType
-      int curSquareType = curSquare.squareType;
-      //defualt stroke
-      //stroke(50-(currentFloor*2), 50);
+    pushMatrix();
+    float scale = (numSquares)/15;
+    scale(scale);
+    translate((-player.x*squareSize) + (width/scale/2) - (230/scale/2), (-player.y*squareSize)+(height/scale/2) - (30/scale/2));
+    for (int i = 0; i < numSquares; i++) {
+      for (int j = 0; j < numSquares; j++) {
+        //current square
+        Square curSquare = dungeon.floors.get(currentFloor).board[i][j];
+        //current squareType
+        if (player.canSee.contains(curSquare) || player.hasSeen.contains(curSquare)) {
+          switch(curSquare.squareType) {
+          case 0:
+            //path
+            image(curSquare.texture, i*squareSize, j*squareSize, squareSize, squareSize);
+            break;
+          case -1: 
+            //wall
+            image(curSquare.texture, i*squareSize, j*squareSize, squareSize, squareSize);
+            break;
+          case -2: 
+            //stair down
+            fill(150, 0, 0);
+            break;
+          case -3:
+            //stair up
+            fill(0, 150, 0);
+            break;
+          case -5: 
+            //door
+            if (curSquare.isOpen) {
+              fill(150, 50, 20, 100);
+            } else {
+              fill(100, 50, 20);
+            }
+            break;
+          case 1: 
+            //?
+            fill(255, 100, 100);
+            break;
+          case 2: 
+            //loot
+            fill(255, 50, 50);
+            break;
+          case 3: 
+            //mob
+            fill(150, 255, 50);
+            break;
+          }
 
-      if (player.canSee.contains(curSquare)) {
-        //walls
-        if (curSquareType==-1) {
-          //fill(50-(currentFloor*2));
-          //stroke(50-(currentFloor*2));
-          image(curSquare.texture, i*squareSize, j*squareSize, squareSize, squareSize);
-        } 
-        //paths
-        else if (curSquareType == 0) {
-          image(curSquare.texture, i*squareSize, j*squareSize, squareSize, squareSize);
-          //fill(250-(currentFloor*5), 245-(currentFloor*5), 240-(currentFloor*5));
-        } 
-        //downStair
-        else if (curSquare.squareType==-2) {
-          fill(150, 0, 0);
-        } 
-        //upStair
-        else if (curSquare.squareType ==-3) {
-          fill(0, 150, 0);
-        } 
-        //door
-        else if (curSquare.squareType == -5) {
-          fill(100, 50, 20);
-        }
-        //visited
-        else if (curSquare.squareType == 1) {
-          fill(255, 100, 100);
-        }
-        //loot
-        else if (curSquare.squareType == 2) {
-          fill(255, 50, 50);
-        } 
-        //mob placeHolder
-        else if (curSquare.squareType == 3) {
-          fill(150, 255, 50);
-        }
+          //draw the square
+          if (curSquare.squareType!=-1 && curSquare.squareType!=0) {
+            rect(i*squareSize, j*squareSize, squareSize, squareSize);
+          } 
+          //darken for light level
+          if (player.canSee.contains(curSquare)) {
+            fill(0, constrain(curSquare.lightLevel*15, 0, 255));
+            rect(i*squareSize, j*squareSize, squareSize, squareSize);
+            if (curSquare.containsMob && (player.x!=i || player.y!=j)) {
+              fill(255, 100, 0, 180);
+              rect(i*squareSize+(squareSize/8), j*squareSize+(squareSize/8), squareSize/1.25, squareSize/1.25);
+            }
+          } else if (player.hasSeen.contains(curSquare)) {
+            fill(0, constrain(curSquare.lightLevel*15, 100, 255));
+            rect(i*squareSize, j*squareSize, squareSize, squareSize);
+          }
 
-        //draw the square
-        if (curSquareType!=-1 && curSquareType!=0) {
-          rect(i*squareSize, j*squareSize, squareSize, squareSize);
+          //draw player
+          if (player.x == i && player.y == j) {
+            //stroke(0);
+            //fill(20, 20, 20, 180);
+            //rect(i*squareSize+(squareSize/4), j*squareSize+(squareSize/4), squareSize/2, squareSize/2);
+            image(playerTexture, i*squareSize+(squareSize/8), j*squareSize+(squareSize/8), squareSize/1.25, squareSize/1.25);
+          }
         } else {
-          //fill(0, 100);
-          //rect(i*squareSize, j*squareSize, squareSize, squareSize);
-        }
-        if (player.x == i && player.y == j) {
-          //stroke(0);
-          fill(20, 20, 20, 180);
-          rect(i*squareSize+(squareSize/4), j*squareSize+(squareSize/4), squareSize/2, squareSize/2);
-        } else if (curSquare.containsMob) {
-          //stroke(255, 0);
-          fill(255, 100, 0, 180);
-          rect(i*squareSize+(squareSize/8), j*squareSize+(squareSize/8), squareSize/1.25, squareSize/1.25);
-        }
-      } else if (player.hasSeen.contains(curSquare)) {
-
-        //walls
-        if (curSquareType==-1) {
-          image(curSquare.texture, i*squareSize, j*squareSize, squareSize, squareSize);
-        } 
-        //paths
-        else if (curSquareType == 0) {
-          image(curSquare.texture, i*squareSize, j*squareSize, squareSize, squareSize);
-        } 
-        //downStair
-        else if (curSquare.squareType==-2) {
-          fill(150, 0, 0, 100);
-        } 
-        //upStair
-        else if (curSquare.squareType ==-3) {
-          fill(0, 150, 0, 100);
-        } 
-        //door
-        else if (curSquare.squareType == -5) {
-          fill(100, 50, 20, 100);
-        }
-        //visited
-        else if (curSquare.squareType == 1) {
-          fill(255, 100, 100, 100);
-        }
-        //loot
-        else if (curSquare.squareType == 2) {
-          fill(255, 50, 50, 100);
-        } 
-        //mob placeHolder
-        else if (curSquare.squareType == 3) {
-          fill(150, 255, 50, 100);
-        }
-
-        if (curSquareType!=-1 && curSquareType!=0) {
+          fill(map(curSquare.lightLevel, 0, 10, 30, 0));
           rect(i*squareSize, j*squareSize, squareSize, squareSize);
-        } else {
-          fill(0, 100);
-          rect(i*squareSize, j*squareSize, squareSize, squareSize);
-        }
-        if (player.x == i && player.y == j) {
-          //stroke(0);
-          fill(200, 200, 200, 180);
-          rect(i*squareSize+(squareSize/4), j*squareSize+(squareSize/4), squareSize/2, squareSize/2);
         }
       }
     }
-  }
-  popMatrix();
+    popMatrix();
 
-  if (nextFloorAnimation) {
-    if (floorAnimationCounter<30) {
-      fill(0, map(floorAnimationCounter, 0, 30, 0, 255));
-      rect(0, 0, width, height);
-    } else {
-      if (floorAnimationCounter==31) {
-        currentFloor++;
-        numLoot=0;
-        for (int i = 0; i<numSquares-1; i++) {
-          for (int j = 0; j<numSquares-1; j++) {
-            if (dungeon.floors.get(currentFloor).board[i][j].squareType==2) {
-              numLoot++;
+    fill(255, 150);
+    //up
+    //rect(0, 0, 800, 50);
+    ////right
+    //rect(750, 0, 50, 800);
+    ////down
+    //rect(0, 750, 800, 50);
+    ////left
+    //rect(0, 0, 50, 800);
+    //rect(390, 390, 20, 20);
+
+
+    stroke(230);
+    strokeWeight(2);
+    rect(810, 10, 180, height-20);
+
+    noStroke();
+
+    if (nextFloorAnimation) {
+      if (floorAnimationCounter<30) {
+        fill(0, map(floorAnimationCounter, 0, 30, 0, 255));
+        rect(0, 0, width, height);
+      } else {
+        if (floorAnimationCounter==31) {
+          currentFloor++;
+          numLoot=0;
+          for (int i = 0; i<numSquares-1; i++) {
+            for (int j = 0; j<numSquares-1; j++) {
+              if (dungeon.floors.get(currentFloor).board[i][j].squareType==2) {
+                numLoot++;
+              }
             }
+          }
+          player.update();
+        }
+        fill(0, map(floorAnimationCounter, 30, 90, 255, 0));
+        rect(0, 0, width, height);
+      }
+      floorAnimationCounter++;
+      if (floorAnimationCounter == 90) {
+        nextFloorAnimation = false;
+        floorAnimationCounter = 0;
+      }
+    }
+
+    fill(255);
+    text("Number Loot: " + (numLoot), width-180, height-120);
+    text("Current Floor: " + (currentFloor+1), width-180, height-60);
+
+    if (firstFloorAnimation) {
+
+      numLoot=0;
+      for (int i = 0; i<numSquares-1; i++) {
+        for (int j = 0; j<numSquares-1; j++) {
+          if (dungeon.floors.get(currentFloor).board[i][j].squareType==2) {
+            numLoot++;
           }
         }
       }
-      fill(0, map(floorAnimationCounter, 30, 90, 255, 0));
+      fill(0, map(floorAnimationCounter, 0, 60, 255, 0));
       rect(0, 0, width, height);
+      if (floorAnimationCounter < 15) {
+        textSize(100);
+        textAlign(CENTER);
+        fill(255, map(floorAnimationCounter, 0, 15, 255, 0));
+        text("Loading...", 0, height/2-100, width, height/2);
+      }
+      textSize(20);
+      textAlign(LEFT);
+      floorAnimationCounter++;
+      if (floorAnimationCounter == 60) {
+        firstFloorAnimation = false;
+        floorAnimationCounter = 0;
+      }
     }
-    floorAnimationCounter++;
-    if (floorAnimationCounter == 90) {
-      nextFloorAnimation = false;
+  }
+}
+
+void startUp() {
+
+  //need random number of floors
+  genCounter = 0;
+  //floors = (int)random(7, 10);
+  floors = 10;
+  //squares = (int)random(100, 150);
+  squares = 45;
+  if (squares%2==0) {
+    squares--;
+  }
+  numLoot = 0;
+
+  numSquares = squares;
+  squareSize = (height-100)/numSquares;
+
+  currentFloor = 0;
+
+  dungeon = new Dungeon(floors, squares, delay);
+  for (Floor f : dungeon.floors) {
+    if (f.floorNum<f.numFloors-1 && !findPath(dungeon.floors.get(f.floorNum).stairDown, dungeon.floors.get(f.floorNum).stairUp, dungeon.floors.get(f.floorNum).board)) {
+      startUp();
     }
-  } else {
-    floorAnimationCounter = 0;
+    for (int i = 0; i<numSquares; i++) {
+      for (int j = 0; j<numSquares; j++) {
+        if (dungeon.floors.get(f.floorNum).board[i][j].squareType==-1) {
+          dungeon.floors.get(f.floorNum).board[i][j].texture = wallTextures.get((int)random(wallTextures.size()));
+        }
+        if (dungeon.floors.get(f.floorNum).board[i][j].squareType==0) {
+          dungeon.floors.get(f.floorNum).board[i][j].texture = floorTextures.get((int)random(floorTextures.size()));
+        }
+      }
+    }
   }
 
-  fill(255);
-  text("Number Loot: " + (numLoot), width-180, height-120);
-  text("Current Floor: " + (currentFloor+1), width-180, height-60);
+  for (int i = 0; i<numSquares-1; i++) {
+    for (int j = 0; j<numSquares-1; j++) {
+      if (dungeon.floors.get(currentFloor).board[i][j].squareType==2) {
+        numLoot++;
+      }
+    }
+  }
+
+  player = new Player((int)dungeon.floors.get(0).stairUp.x, (int)dungeon.floors.get(0).stairUp.y);
+  player.update();
+}
+
+void keyPressed() {
+  if (floorAnimationCounter==0) {
+    if (moveCooldown==0) {
+      if (key != CODED) {
+        switch(key) {
+        case 'w': 
+          player.move('u', true);
+          break;
+        case 'a': 
+          player.move('l', true);
+          break;
+        case 's': 
+          player.move('d', true);
+          break;
+        case 'd': 
+          player.move('r', true);
+          break;
+
+        case 'W': 
+          moving = 'u';
+          moves = 6;
+          break;
+        case 'A': 
+          moving ='l';
+          moves = 6;
+          break;
+        case 'S': 
+          moving = 'd';
+          moves = 6;
+          break;
+        case 'D': 
+          moving = 'r';
+          moves = 6;
+          break;
+
+        case ENTER: 
+          player.openDoor();
+          break;
+        }
+      } else {
+        switch(keyCode) {
+        case UP: 
+          player.move('u', true);
+          break;
+        case RIGHT: 
+          player.move('r', true);
+          break;
+        case DOWN: 
+          player.move('d', true);
+          break;
+        case LEFT: 
+          player.move('l', true);
+          break;
+        }
+      }
+      moveCooldown = 3;
+    }
+  }
 }
 
 
+void mousePressed() {
+
+  if (mouseButton == LEFT) {
+    player.attack();
+    player.openDoor();
+  }
+
+  if (mouseButton == RIGHT) {
+    loading = 10;
+  }
+}
 
 boolean findPath(PVector down, PVector up, Square[][] board) {
   PVector start = up;
@@ -287,123 +427,4 @@ boolean findPath(PVector down, PVector up, Square[][] board) {
 float heuristic(PVector start, PVector goal) {
   float heuristic = dist(start.x, start.y, goal.x, goal.y);
   return heuristic;
-}
-
-
-void startUp() {
-
-  //need random number of floors
-  genCounter = 0;
-  //floors = (int)random(7, 10);
-  floors = 15;
-  //squares = (int)random(100, 150);
-  squares = 30;
-  if (squares%2==0) {
-    squares--;
-  }
-  numLoot = 0;
-
-  numSquares = squares;
-  squareSize = (height-100)/numSquares;
-
-  currentFloor = 0;
-  currentX = (int)random(squares);
-  currentY = (int)random(squares);
-
-  dungeon = new Dungeon(floors, squares, delay);
-  for (Floor f : dungeon.floors) {
-    if (f.floorNum<f.numFloors-1 && !findPath(dungeon.floors.get(f.floorNum).stairDown, dungeon.floors.get(f.floorNum).stairUp, dungeon.floors.get(f.floorNum).board)) {
-      startUp();
-    }
-    for (int i = 0; i<numSquares; i++) {
-      for (int j = 0; j<numSquares; j++) {
-        if (dungeon.floors.get(f.floorNum).board[i][j].squareType==-1) {
-          dungeon.floors.get(f.floorNum).board[i][j].texture = wallTextures.get((int)random(wallTextures.size()));
-        }
-        if (dungeon.floors.get(f.floorNum).board[i][j].squareType==0) {
-          dungeon.floors.get(f.floorNum).board[i][j].texture = floorTextures.get((int)random(floorTextures.size()));
-        }
-      }
-    }
-  }
-
-  for (int i = 0; i<numSquares-1; i++) {
-    for (int j = 0; j<numSquares-1; j++) {
-      if (dungeon.floors.get(currentFloor).board[i][j].squareType==2) {
-        numLoot++;
-      }
-    }
-  }
-
-  player = new Player((int)dungeon.floors.get(0).stairUp.x, (int)dungeon.floors.get(0).stairUp.y);
-}
-
-void keyPressed() {
-  if (floorAnimationCounter==0) {
-    if (key != CODED) {
-      switch(key) {
-      case 'w': 
-        player.move('u', true);
-        break;
-      case 'a': 
-        player.move('l', true);
-        break;
-      case 's': 
-        player.move('d', true);
-        break;
-      case 'd': 
-        player.move('r', true);
-        break;
-
-      case 'W': 
-        moving = 'u';
-        moves = 6;
-        break;
-      case 'A': 
-        moving ='l';
-        moves = 6;
-        break;
-      case 'S': 
-        moving = 'd';
-        moves = 6;
-        break;
-      case 'D': 
-        moving = 'r';
-        moves = 6;
-        break;
-      }
-    } else {
-      switch(keyCode) {
-      case UP: 
-        player.move('u', true);
-        break;
-      case RIGHT: 
-        player.move('r', true);
-        break;
-      case DOWN: 
-        player.move('d', true);
-        break;
-      case LEFT: 
-        player.move('l', true);
-        break;
-      }
-    }
-  }
-}
-
-
-void mousePressed() {
-
-  if (mouseButton == LEFT) {
-    //if (currentFloor<floors-1) {
-    //  nextFloorAnimation = true;
-    //} else {
-    //  currentFloor = 0;
-    //}
-    //genCounter = 0;
-  }
-
-  if (mouseButton == RIGHT) {
-    startUp();
-  }
 }
