@@ -2,7 +2,6 @@ class Room {
 
   int x1, y1, x2, y2;
   int rwidth, rheight;
-  int parentFloor;
   int roomType;
   ArrayList<Square> childSquares;
 
@@ -49,35 +48,31 @@ class Room {
 
 
   //returns true if this room overlaps with a newRoom
-  public boolean overlaps(Room newRoom) {
+  public boolean overlaps(Room tempRoom) {
     boolean overlaps = true;
 
     //if room 1 is to the left or right of room 2, they don't overlap
-    if ((newRoom.x1 > this.x2|| newRoom.x2<this.x1)) {
+    if ((tempRoom.x1 > this.x2|| tempRoom.x2<this.x1)) {
       overlaps = false;
     }
 
     //if room 2 is to above or below room 2, they don't overlap
-    if ((newRoom.y1 > this.y2 || newRoom.y2<this.y1)) {
+    if ((tempRoom.y1 > this.y2 || tempRoom.y2<this.y1)) {
       overlaps = false;
     }
 
-    //if the room is too small, it shouldn't be a room
-    if (abs(newRoom.rwidth-newRoom.rheight)>3 || newRoom.rheight<2 || newRoom.rwidth <2) {
-      overlaps = true;
-    }
-
-    //if the room is too close to the center, it should't be a room
-    if (abs(newRoom.x1 - (numSquares/2))<3 && abs(newRoom.y1 - (numSquares/2))<3 && random(1)<.7) {
-      overlaps = true;
-    }
-    if (abs(newRoom.x2 - (numSquares/2))<3 && abs(newRoom.y2 - (numSquares/2))<3 && random(1)<.7) {
-      overlaps = true;
-    }
+    
 
     return overlaps;
   }
 
+  public boolean notRoom(){
+    //if the room is too small, it shouldn't be a room
+    if (abs(this.rwidth-this.rheight)>3 || this.rheight<2 || this.rwidth <2) {
+      return true;
+    }
+    return false;
+  }
 
   //add all the child squares to childSquares
   public void addChildren(Square[][] board) {

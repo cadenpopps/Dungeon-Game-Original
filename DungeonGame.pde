@@ -1,7 +1,7 @@
 Dungeon dungeon;
 int currentFloor, numSquares, squareSize, numLoot;
 int floors, squares;
-int counter = 0, floorAnimationCounter = 0;
+int floorAnimationCounter = 0;
 boolean delay = false, nextFloorAnimation = false, firstFloorAnimation = false;
 Player player;
 char moving = ' ';
@@ -145,7 +145,8 @@ void draw() {
 
           //draw player
         } else {
-          fill(map(curSquare.lightLevel, 0, 10, 30, 0));
+          fill(map(curSquare.lightLevel, 0, 15, 15, 0));
+          //fill(0);
           rect(i*squareSize, j*squareSize, squareSize, squareSize);
         }
       }

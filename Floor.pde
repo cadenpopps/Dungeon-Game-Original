@@ -53,27 +53,6 @@ class Floor {
         board[i][j] = new Square(i, j, 0, -1);
       }
     }
-
-    //create down stair
-    if (floorNum < numFloors-1) {
-      stairDown = new PVector((int)random(4, numSquares-4), (int)random(4, numSquares-4));
-
-      //check if up and down stair too close
-      while (abs(stairDown.x-stairUp.x) < numSquares/3 && abs(stairDown.y-stairUp.y) < numSquares/3) {
-        stairDown.x = (int)random(4, numSquares-4);
-        stairDown.y = (int)random(4, numSquares-4);
-      }
-      rooms.add(new Room((int)stairDown.x-(int)random(2, 4), (int)stairDown.y-(int)random(2, 4), (int)stairDown.x+(int)random(2, 4), (int)stairDown.y+(int)random(2, 4), numSquares));
-    }
-
-    //add 3x3 rooms around stairs
-    rooms.add(new Room((int)stairUp.x-(int)random(2, 4), (int)stairUp.y-(int)random(2, 4), (int)stairUp.x+(int)random(2, 4), (int)stairUp.y+(int)random(2, 4), numSquares));
-
-    for (Room r : rooms) {
-      r.addChildren(board);
-      regions.add(new Region(r.childSquares));
-      r.roomType = -1;
-    }
   }
 
 
@@ -81,6 +60,7 @@ class Floor {
   public void genDungeon() {
 
     //generate the rooms of dungeon, no overlap
+    genStairs();
     genRooms();
     genMaze();
     connectRegions();
@@ -107,6 +87,31 @@ class Floor {
     rooms = null;
     regions = null;
     connectors = null;
+  }
+
+  //generate stairs and stair rooms
+  public void genStairs() {
+
+    //create down stair
+    if (floorNum < numFloors-1) {
+      stairDown = new PVector((int)random(4, numSquares-4), (int)random(4, numSquares-4));
+
+      //check if up and down stair too close
+      while (abs(stairDown.x-stairUp.x) < numSquares/3 && abs(stairDown.y-stairUp.y) < numSquares/3) {
+        stairDown.x = (int)random(4, numSquares-4);
+        stairDown.y = (int)random(4, numSquares-4);
+      }
+      rooms.add(new Room((int)stairDown.x-(int)random(2, 4), (int)stairDown.y-(int)random(2, 4), (int)stairDown.x+(int)random(2, 4), (int)stairDown.y+(int)random(2, 4), numSquares));
+    }
+
+    //add 3x3 rooms around stairs
+    rooms.add(new Room((int)stairUp.x-(int)random(2, 4), (int)stairUp.y-(int)random(2, 4), (int)stairUp.x+(int)random(2, 4), (int)stairUp.y+(int)random(2, 4), numSquares));
+
+    for (Room r : rooms) {
+      r.addChildren(board);
+      regions.add(new Region(r.childSquares));
+      r.roomType = -1;
+    }
   }
 
   //generates board one step at a time
@@ -164,11 +169,15 @@ class Floor {
       Room newRoom = new Room(rx1, ry1, rx2, ry2, numSquares);
 
       //boolean for overlapping, CAN BE MORE EFFICIENT?
-      boolean overlaps = false;
+      boolean notRoom = false;
+
+      if (newRoom.notRoom()) {
+        notRoom = true;
+      }
 
       for (Room r : rooms) {
-        if (r.overlaps(newRoom)) {
-          overlaps = true;
+        if (newRoom.overlaps(r)) {
+          notRoom = true;
           r = null;
           break;
         }
@@ -176,7 +185,7 @@ class Floor {
 
 
       //if it doens't overlap, actually add new room
-      if (!overlaps) {
+      if (!notRoom) {
         rooms.add(newRoom);
         newRoom.addChildren(board);
         regions.add(new Region(newRoom.childSquares));
