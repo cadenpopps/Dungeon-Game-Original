@@ -1,24 +1,27 @@
 class Dungeon {
 
-  int numFloors, floorSize, numSquares;
+  int numFloors, numSquares;
   ArrayList<Floor> floors;
 
   //new dungeon stores floors, squares per floor
-  public Dungeon(int f, int squares, boolean delay) {
+  public Dungeon(int _numFloors, int _numSquares) {
 
-    numFloors = f;
-    numSquares = squares;
-    floorSize = (height-100)/numSquares;
+    //number of floors
+    numFloors = _numFloors;
+    //number of squares (width and height)
+    numSquares = _numSquares;
+    //
+    //floorSize = (height-100)/numSquares;
     floors = new ArrayList<Floor>();
 
     for (int i = 0; i < numFloors; i++) {
       if (i>0) {
-        floors.add(new Floor(i, numSquares, floors.get(i-1).stairDown, delay, numFloors));
+        floors.add(new Floor(i, numSquares, numFloors, floors.get(i-1).stairDown));
       } else {
         PVector entrance = new PVector();
         entrance.x = (int)random(5,numSquares-5);
         entrance.y = (int)random(5,numSquares-5);
-        floors.add(new Floor(i, numSquares, entrance, delay, numFloors));
+        floors.add(new Floor(i, numSquares, numFloors, entrance));
       }
     }
   }

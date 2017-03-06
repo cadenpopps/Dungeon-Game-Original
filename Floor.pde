@@ -10,35 +10,33 @@ class Floor {
   ArrayList<Region> regions;
   ArrayList<Square> connectors;
   boolean notVisited;
-  boolean showCreation;
   int roomTries, maxRoomSize, minRoomSize, roomOffSet;
   ArrayList<Mob> mobs;
+  final int mobCap;
 
 
   //makes a new floor with a location, number of squares, an upStair, and arraylists of rooms, regions, and connectors
-  public Floor(int loc, int numSq, PVector stair, boolean delay, int _numFloors) {
+  public Floor(int _floorNum, int _numSquares, int _numFloors, PVector _stairUp) {
 
-    //new floor stores floor #, width/height of board, location of the up stair, and an collection of rooms
-    floorNum = loc;
-    numSquares = numSq;
-    numFloors = _numFloors; 
-    stairUp = stair.copy();
+    //new floor stores floor #, width/height of board, location of the up stair, and a collection of rooms
+    floorNum = _floorNum;
+    numSquares = _numSquares;
+    numFloors = _numFloors;
+    stairUp = _stairUp.copy();
     rooms = new ArrayList<Room>();
     regions = new ArrayList<Region>();
     connectors = new ArrayList<Square>();
     mobs = new ArrayList<Mob>();
-    showCreation = delay;
     roomTries = numSquares*20;
     maxRoomSize = 13;
     minRoomSize = (int)maxRoomSize/4+1;
     roomOffSet = (int)minRoomSize/2+2;
+    mobCap = 10+(floorNum*2);
 
     //generate board, only up stair and downstair rooms
     genBoard();
     //generate rest of dungeon, all rooms and passages
-    if (!showCreation) {
-      genDungeon();
-    }
+    genDungeon();
   }
 
 
