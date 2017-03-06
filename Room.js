@@ -43,19 +43,17 @@ function Room( _x1, _y1, _x2, _y2, numSquares ) {
 
     //returns true if new room overlaps with a tempRoom
     this.overlaps = function( tempRoom ) {
-        var overlaps = true;
 
         //if room 1 is to the left or right of room 2, they don't overlap
-        if (( tempRoom.x1 > this.x2 || tempRoom.x2 < this.x1 )) {
-            overlaps = false;
+        if ( tempRoom.x1 > this.x2 || tempRoom.x2 < this.x1 ) {
+            return false;
         }
 
         //if room 2 is to above or below room 2, they don't overlap
-        if (( tempRoom.y1 > this.y2 || tempRoom.y2 < this.y1 )) {
-            overlaps = false;
+        if ( tempRoom.y1 > this.y2 || tempRoom.y2 < this.y1 ) {
+            return false;
         }
-
-        return overlaps;
+        return true;
     }
 
     this.notRoom = function( ) {
@@ -71,7 +69,6 @@ function Room( _x1, _y1, _x2, _y2, numSquares ) {
 
         for ( var i = this.x1; i < this.x2; i++ ) {
             for ( var j = this.y1; j < this.y2; j++ ) {
-                console.log( i + "   " + j )
                 this.childSquares.push( board[i][j ]);
             }
         }

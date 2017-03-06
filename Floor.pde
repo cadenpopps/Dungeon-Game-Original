@@ -145,7 +145,7 @@ class Floor {
     for (int i = 0; i < roomTries; i++) {
 
       //random top left corner location between 2 and width-2
-      int rx1 = (int)random(0, numSquares-3); 
+      int rx1 = (int)random(0, numSquares-3);
       int ry1 = (int)random(0, numSquares-3);
 
       //makes room size
@@ -246,11 +246,11 @@ class Floor {
     }
     for (int i = 0; i<numSquares; i++) {
       for (int j = 0; j<numSquares; j++) {
-        if (board[i][j].squareType == 0 && board[i][j].pathNeighbors(board, numSquares) == 2) {
+        if (board[i][j].squareType == 0 && board[i][j].pathNeighbors(board) == 2) {
           if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (board[i-1][j].squareType==-1 && board[i-2][j].squareType==0 && board[i-2][j].region == board[i][j].region) && random(1)<.02) {
             board[i-1][j].squareType = 0;
             board[i-1][j].region = board[i][j].region;
-          } 
+          }
           if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (board[i+1][j].squareType==-1 && board[i+2][j].squareType==0 && board[i+2][j].region == board[i][j].region) && random(1)<.02) {
             board[i+1][j].squareType = 0;
             board[i+1][j].region = board[i][j].region;
@@ -258,7 +258,7 @@ class Floor {
           if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (board[i][j-1].squareType==-1 && board[i][j-2].squareType==0 && board[i][j-2].region == board[i][j].region) && random(1)<.02) {
             board[i][j-1].squareType = 0;
             board[i][j-1].region = board[i][j].region;
-          } 
+          }
           if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (board[i][j+1].squareType==-1 && board[i][j+2].squareType==0 && board[i][j+2].region == board[i][j].region) && random(1)<.02) {
             board[i][j+1].squareType = 0;
             board[i][j+1].region = board[i][j].region;
@@ -268,11 +268,11 @@ class Floor {
     }
     for (int i = 0; i<numSquares; i++) {
       for (int j = 0; j<numSquares; j++) {
-        if (board[i][j].squareType == -1 && board[i][j].pathNeighbors(board, numSquares) == 2) {
+        if (board[i][j].squareType == -1 && board[i][j].pathNeighbors(board) == 2) {
           if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (board[i-1][j].squareType==0 && board[i+1][j].squareType==0 && board[i-1][j].region == board[i+1][j].region) && random(1)<.02) {
             board[i][j].squareType = 0;
             board[i][j].region = board[i][j].region;
-          } 
+          }
           if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (board[i][j-1].squareType==0 && board[i][j+1].squareType==0 && board[i][j-1].region == board[i][j+1].region) && random(1)<.02) {
             board[i][j].squareType = 0;
             board[i][j].region = board[i][j].region;
@@ -394,7 +394,7 @@ class Floor {
   public void removeDetours() {
     for (int i = 0; i<numSquares; i++) {
       for (int j = 0; j<numSquares; j++) {
-        if (board[i][j].squareType == -1 && board[i][j].pathNeighbors(board, numSquares) == 3 && board[i][j].diagNeighbors(board, numSquares)==4) {
+        if (board[i][j].squareType == -1 && board[i][j].pathNeighbors(board) == 3 && board[i][j].diagNeighbors(board)==4) {
           board[i][j].squareType = 5;
           if (i>1 && j>1 && i<numSquares-2 && j<numSquares-2 && (board[i-1][j].squareType==-1 || board[i-1][j].squareType ==5)) {
             board[i-1][j].squareType = 0;
@@ -424,7 +424,7 @@ class Floor {
     }
     for (int i = 0; i<numSquares; i++) {
       for (int j = 0; j<numSquares; j++) {
-        if (board[i][j].squareType == -1 && board[i][j].pathNeighbors(board, numSquares) == 4 && board[i][j].diagNeighbors(board, numSquares)==4 && random(1)<.8) {
+        if (board[i][j].squareType == -1 && board[i][j].pathNeighbors(board) == 4 && board[i][j].diagNeighbors(board)==4 && random(1)<.8) {
           ArrayList<Square> n = board[i][j].neighbors(board);
           int temp = (int)random(0, n.size());
           n.get(temp).squareType=-1;
@@ -490,7 +490,7 @@ class Floor {
         if (board[i][j].squareType == -5 && random(1)<.15) {
           board[i][j].squareType = 0;
         }
-        if (board[i][j].squareType == -1 && board[i][j].pathNeighbors(board, numSquares)>2) {
+        if (board[i][j].squareType == -1 && board[i][j].pathNeighbors(board)>2) {
           board[i][j].squareType = 0;
         }
         if (board[i][j].squareType == -5) {

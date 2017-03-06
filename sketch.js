@@ -22,12 +22,12 @@ var stairDownTexture;
 function preload( ) {
 
     wallTextures = [ ];
-    wallTextures.push(loadImage( "data/wallTexture0.jpg" ));
+    //wallTextures.push(loadImage( "data/wallTexture0.jpg" ));
     floorTextures = [ ];
-    floorTextures.push(loadImage( "data/floorTexture0.jpg" ));
-    playerTexture = loadImage( "data/playerTexture.png" );
-    stairUpTexture = loadImage( "data/stairUpTexture.png" );
-    stairDownTexture = p5.Image;
+    //floorTextures.push(loadImage( "data/floorTexture0.jpg" ));
+    //playerTexture = loadImage( "data/playerTexture.png" );
+    //stairUpTexture = loadImage( "data/stairUpTexture.png" );
+    //stairDownTexture = p5.Image;
 
 }
 
@@ -47,6 +47,8 @@ function setup( ) {
     moveCooldown = 0;
 
     textSize( 30 );
+    noStroke( );
+    //stroke(255);
 
     //loading = 10;
     newDungeon( );
@@ -54,7 +56,7 @@ function setup( ) {
 
 function draw( ) {
 
-    background( 0 );
+    background(0 );
 
     push( );
     //var scale = (numSquares)/15;
@@ -69,12 +71,16 @@ function draw( ) {
             switch ( curSquare.squareType ) {
                 case 0:
                     //path
-                    image( curSquare.texture, i * squareSize, j * squareSize, squareSize, squareSize );
+                    fill(255);
+                    rect( i * squareSize, j * squareSize, squareSize, squareSize );
+                    //image( curSquare.texture, i * squareSize, j * squareSize, squareSize, squareSize );
 
                     break;
                 case - 1:
                     //wall
-                    image( curSquare.texture, i * squareSize, j * squareSize, squareSize, squareSize );
+                    fill(0);
+                    rect( i * squareSize, j * squareSize, squareSize, squareSize );
+                    //image( curSquare.texture, i * squareSize, j * squareSize, squareSize, squareSize );
                     break;
                 case - 2:
                     //stair down
@@ -105,11 +111,6 @@ function draw( ) {
                     //mob
                     fill( 150, 255, 50 );
                     break;
-            }
-
-            if ( curSquare.squareType == -1 ) {
-                console.log( "drawing wall" );
-                image( curSquare.texture, i * squareSize, j * squareSize, squareSize, squareSize );
             }
 
             //draw the square
@@ -153,14 +154,12 @@ function draw( ) {
     //rect(0, 0, 50, 800);
     //rect(390, 390, 20, 20);
 
-    fill( 255, 230, 210, 150 );
-    rect( width - 400, 10, 380, height - 100 );
+    fill( 255, 255, 210, 150 );
+    rect( width - 400, 20, 380, height - 150 );
 
     fill( 255 );
     //text( "Mobs: " + dungeon.floors.get( currentFloor ).mobs.size( ), width - 180, height - 120 );
     text( "Current Floor: " + ( currentFloor + 1 ), width - 320, height - 150 );
-    noStroke( );
-
 }
 
 function newDungeon( ) {
@@ -175,13 +174,14 @@ function newDungeon( ) {
     }
 
     //calc new squareSize
-    squareSize = ( height - 100 ) / numSquares;
+    squareSize = floor(( height-100) / numSquares);
+
     //reset currentFloor
     currentFloor = 0;
 
     //make a new dungeon
     dungeon = new Dungeon( numFloors, numSquares );
-    for ( f of dungeon.floors ) {
+    for ( let f of dungeon.floors ) {
         // if (f.floorNum < f.numFloors - 1 && !findPath(dungeon.floors.get(f.floorNum).stairDown, dungeon.floors.get(f.floorNum).stairUp, dungeon.floors.get(f.floorNum).board)) {
         //     startUp();
         // }
