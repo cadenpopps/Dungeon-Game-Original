@@ -57,10 +57,6 @@ function setup( ) {
     //loading = 10;
     newDungeon( );
 }
-
-
-var button = createButton("reset");
-    button.mousePressed(newDungeon);
     
 function draw( ) {
 
