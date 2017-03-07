@@ -8,10 +8,10 @@ function Room( _x1, _y1, _x2, _y2, numSquares ) {
     this.y2 = _y2;
 
     //push x1 and y2 to odd squares
-    if ( this.x1 % 2 == 0 ) {
+    if ( this.x1 % 2 === 0 ) {
         this.x1++;
     }
-    if ( this.y1 % 2 == 0 ) {
+    if ( this.y1 % 2 === 0 ) {
         this.y1++;
     }
 
@@ -82,5 +82,18 @@ function Room( _x1, _y1, _x2, _y2, numSquares ) {
                 board[i][j ].squareType = 0;
             }
         }
+    }
+    
+    //returns edges of room
+    this.getEdges = function( board ) {
+        
+        var edges = [];
+        
+        for(let s of this.childSquares){
+          if(s.x == this.x1 || s.y == this.y1 || s.x == this.x2 || s.y == this.y2){
+            edges.push(s);
+          }
+        }
+      return edges;
     }
 }

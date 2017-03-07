@@ -12,13 +12,14 @@ function Floor( _floorNum, _numSquares, _numFloors, _stairUp ) {
     this.maxRoomSize = 13;
     this.minRoomSize = floor( this.maxRoomSize / 4 ) + 1;
     this.roomOffSet = floor( this.minRoomSize / 2 ) + 2;
-    this.mobCap = 10 + ( this.floorNum * 2 );
+    this.lootCap = floor(numSquares/10) + (( this.floorNum+1) * 2 );
+    this.mobCap = floor(numSquares/10) + (( this.floorNum+1) * 2);
 
     //generates floor, called after floor is created by parent dungeon
     this.buildFloor = function( ) {
         this.genBoard( );
         this.genDungeon( );
-    }
+    };
 
     //generate board, fill with empty squares
     this.genBoard = function( ) {
@@ -30,27 +31,43 @@ function Floor( _floorNum, _numSquares, _numFloors, _stairUp ) {
                 this.board[i][j ] = new Square( i, j, this.floorNum, -1 );
             }
         }
-    }
+    };
 
     //generate rest of dungeon
     this.genDungeon = function( ) {
 
+        var tempTime = millis();
         this.genStairs( );
+        console.log("genStairs\t\t" + (millis()-tempTime));
+        
+        tempTime = millis();
         this.genRooms( );
+        console.log("genRooms\t\t" + (millis()-tempTime));
+        
+        tempTime = millis();
         this.genMaze( );
+        console.log("genMaze\t\t" + (millis()-tempTime));
+        
+        tempTime = millis();
         this.connectRegions( );
+        console.log("connectRegions\t\t" + (millis()-tempTime));
+        
+        tempTime = millis();
         this.sparseMaze( );
-        // for ( var i = 0; i < floor( numSquares / 20 + 1 ); i++ ) {
-        //     removeDetours( );
-        // }
-        // populate( );
-        //
-        // //makes sure stair locations aren't overwritten
-        // this.board[stairUp.x][stairUp.y ].squareType = -3;
-        // if ( this.floorNum < this.numFloors - 1 ) {
-        //     this.board[stairDown.x][stairDown.y ].squareType = -2;
-        // }
-        //
+        console.log("sparseMaze\t\t" + (millis()-tempTime));
+        for ( var i = 0; i < (1 + floor(numSquares/20)); i++ ) {
+            tempTime = millis();
+            this.removeDetours( );
+            console.log("removeDetours\t\t" + (millis()-tempTime));
+        }
+        this.populate( );
+        
+        //makes sure stair locations aren't overwritten
+        this.board[this.stairUp.x][this.stairUp.y ].squareType = -3;
+        if ( this.floorNum < this.numFloors - 1 ) {
+            this.board[this.stairDown.x][this.stairDown.y ].squareType = -2;
+        }
+        
         // for ( var i = 0; i < this.numSquares; i++ ) {
         //     for ( var j = 0; j < this.numSquares; j++ ) {
         //         if ( this.board[i][j ].squareType == 5) {
@@ -59,10 +76,11 @@ function Floor( _floorNum, _numSquares, _numFloors, _stairUp ) {
         //     }
         // }
         //
-        // rooms = null;
-        // regions = null;
-        // connectors = null;
-    }
+        
+        rooms = null;
+        regions = null;
+        connectors = null;
+    };
 
     //generate stairs and stair rooms
     this.genStairs = function( ) {
@@ -84,10 +102,10 @@ function Floor( _floorNum, _numSquares, _numFloors, _stairUp ) {
 
         for ( let r of this.rooms ) {
             r.addChildren( this.board );
-            //this.regions.push(new Region( r.childSquares ));
+            this.regions.push(new Region( r.childSquares ));
             r.roomType = -1;
         }
-    }
+    };
 
     //generate rooms, non overlapping
     this.genRooms = function( ) {
@@ -142,7 +160,7 @@ function Floor( _floorNum, _numSquares, _numFloors, _stairUp ) {
         for ( let r of this.rooms ) {
             r.makeRoom( this.board );
         }
-    }
+    };
 
     //generate perfect maze to fill rest of squares
     this.genMaze = function( ) {
@@ -164,12 +182,12 @@ function Floor( _floorNum, _numSquares, _numFloors, _stairUp ) {
                             this.board[cur.x][cur.y ].squareType = 0;
                             temp.push( this.board[cur.x][cur.y ]);
                             var moves = this.board[cur.x][cur.y ].moves( this.board );
-                            if ( moves.length != 0 ) {
+                            if ( moves.length !== 0 ) {
                                 moveStack.push( cur );
                                 //int randomMove = (int)random(0, moves.size());
                                 var randomMove = floor(map( random( 1 ), 0, 1, 0, moves.length ));
                                 cur = moves[randomMove];
-                            } else if ( moveStack.length != 0 ) {
+                            } else if ( moveStack.length !== 0 ) {
                                 cur = moveStack[moveStack.length - 1];
                                 moveStack.pop( );
                             } else {
@@ -239,7 +257,7 @@ function Floor( _floorNum, _numSquares, _numFloors, _stairUp ) {
                 }
             }
         }
-    }
+    };
 
     //connects all regions with a door
     this.connectRegions = function( ) {
@@ -294,7 +312,7 @@ function Floor( _floorNum, _numSquares, _numFloors, _stairUp ) {
                 s.region = r;
             }
         }
-    }
+    };
 
     //removes most dead ends
     this.sparseMaze = function( ) {
@@ -333,17 +351,119 @@ function Floor( _floorNum, _numSquares, _numFloors, _stairUp ) {
             }
         }
 
-        //delete doors that lead to nothing
-        //for (int i = 0; i<numSquares; i++) {
-        //  for (int j = 0; j<numSquares; j++) {
-        //    if (board[i][j].squareType == -5 && board[i][j].numNeighbors(board)<2) {
-        //      board[i][j].squareType = -1;
-        //    }
-        //    if (board[i][j].squareType == -5 && random(1)<.1) {
-        //      board[i][j].squareType = 0;
-        //    }
-        //  }
-        //}
-    }
+        // //delete doors that lead to nothing
+        // for (var i = 0; i<this.numSquares; i++) {
+        //   for (var j = 0; j<this.numSquares; j++) {
+        //     if (this.board[i][j].squareType == -5 && this.board[i][j].numNeighbors(this.board)<2) {
+        //       this.board[i][j].squareType = -1;
+        //     }
+        //     if (this.board[i][j].squareType == -5 && random(1)<.1) {
+        //       this.board[i][j].squareType = 0;
+        //     }
+        //   }
+        // }
+    };
+    
+    //removes 3x3 detours and calls sparseMaze again
+    this.removeDetours = function() {
+      for (var i = 0; i<this.numSquares; i++) {
+        for (var j = 0; j<this.numSquares; j++) {
+          if (this.board[i][j].squareType == -1 && this.board[i][j].pathNeighbors(this.board) == 3 && this.board[i][j].diagNeighbors(this.board)==4) {
+            this.board[i][j].squareType = 5;
+            if (i>1 && j>1 && i<this.numSquares-2 && j<this.numSquares-2 && (this.board[i-1][j].squareType==-1 || this.board[i-1][j].squareType == 5)) {
+              this.board[i-1][j].squareType = 0;
+              this.board[i-1][j].region = this.board[i][j].region;
+              this.board[i+1][j].squareType = -1;
+            } else if (i>1 && j>1 && i<this.numSquares-2 && j<this.numSquares-2 && (this.board[i+1][j].squareType==-1 || this.board[i+1][j].squareType == 5)) {
+              this.board[i+1][j].squareType = 0;
+              this.board[i+1][j].region = this.board[i][j].region;
+              this.board[i-1][j].squareType = -1;
+            } else if (i>1 && j>1 && i<this.numSquares-2 && j<this.numSquares-2 && (this.board[i][j-1].squareType==-1 || this.board[i][j-1].squareType == 5)) {
+              this.board[i][j-1].squareType = 0;
+              this.board[i][j-1].region = this.board[i][j].region;
+              this.board[i][j+1].squareType = -1;
+            } else if (i>1 && j>1 && i<this.numSquares-2 && j<this.numSquares-2 && (this.board[i][j+1].squareType==-1 || this.board[i][j+1].squareType == 5)) {
+              this.board[i][j+1].squareType = 0;
+              this.board[i][j+1].region = this.board[i][j].region;
+              this.board[i][j-1].squareType = -1;
+            }
+          } else if (this.board[i][j].squareType == 5) {
+            this.board[i][j].squareType = -1;
+          }
+        }
+      }
+      for (var i = 0; i<this.numSquares; i++) {
+        for (var j = 0; j<this.numSquares; j++) {
+          if (this.board[i][j].squareType == -1 && this.board[i][j].pathNeighbors(this.board) == 4 && this.board[i][j].diagNeighbors(this.board)==4 && random(1)<.8) {
+            var n = this.board[i][j].neighbors(this.board);
+            var temp = floor(random(0, n.length));
+            n[temp].squareType=-1;
+          }
+        }
+      }
+      this.sparseMaze();
+    };
 
+    this.populate = function() {
+      
+      var i = 0;
+      while (i<this.lootCap){
+        
+        var randomRoom = this.rooms[floor(random(this.rooms.length))];
+        while(randomRoom.roomType == -1){
+          randomRoom = this.rooms[floor(random(this.rooms.length))];
+        }
+        var roomEdges = randomRoom.getEdges();
+        var randomSquare = roomEdges[floor(random(roomEdges.length))];
+        while(randomSquare.squareType!=0){
+          randomSquare = roomEdges[floor(random(roomEdges.length))];
+        }
+        randomSquare.squareType = 2;
+        i++;
+      }
+      
+      i = 0;
+      while (i<this.mobCap){
+        
+        var randomRoom = this.rooms[floor(random(this.rooms.length))];
+        while(randomRoom.roomType == -1){
+          randomRoom = this.rooms[floor(random(this.rooms.length))];
+        }
+        var randomSquare = randomRoom.childSquares[floor(random(randomRoom.childSquares.length))];
+        while(randomSquare.squareType!=0){
+          randomSquare = randomRoom.childSquares[floor(random(randomRoom.childSquares.length))];
+        }
+        randomSquare.squareType = 3;
+        randomSquare.containsMob = true;
+        //this.mobs.push(new Mob(randomSquare.x, randomSquare.y));
+        i++;
+      }
+  
+      //delete doors that lead to nothing
+      // for (int i = 0; i<numSquares; i++) {
+      //   for (int j = 0; j<numSquares; j++) {
+      //     if (board[i][j].squareType == -5 && board[i][j].numNeighbors(board)<2) {
+      //       board[i][j].squareType = -1;
+      //     }
+      //     if (board[i][j].squareType == -5 && random(1)<.15) {
+      //       board[i][j].squareType = 0;
+      //     }
+      //     if (board[i][j].squareType == -1 && board[i][j].pathNeighbors(board)>2) {
+      //       board[i][j].squareType = 0;
+      //     }
+      //     if (board[i][j].squareType == -5) {
+      //       for (int a = i-1; a<=i+1; a++) {
+      //         for (int b = j-1; b<=j+1; b++) {
+      //           if (a>0 && b>0 && a<numSquares-1 && b<numSquares-1 && (a!=i || b!=j)) {
+      //             if (board[a][b].squareType == -5 && random(1)<.9) {
+      //               board[a][b].squareType = -1;
+      //             }
+      //           }
+      //         }
+      //       }
+      //     }
+      //   }
+      // }
+    };
+    
 }

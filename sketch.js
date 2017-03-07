@@ -46,14 +46,22 @@ function setup( ) {
     loading = 0;
     moveCooldown = 0;
 
+    frameRate(30);
+
     textSize( 30 );
     noStroke( );
     //stroke(255);
-
+    
+    
+    
     //loading = 10;
     newDungeon( );
 }
 
+
+var button = createButton("reset");
+    button.mousePressed(newDungeon);
+    
 function draw( ) {
 
     background( 0 );
@@ -88,8 +96,8 @@ function draw( ) {
                     break;
                 case - 3:
                     //stair up
+                    fill(0, 150, 0);
                     //image( stairTexture, i * squareSize, j * squareSize, squareSize, squareSize );
-                    //fill(0, 150, 0);
                     break;
                 case - 5:
                     //door
@@ -114,7 +122,7 @@ function draw( ) {
             }
 
             //draw the square
-            if ( curSquare.squareType != -1 && curSquare.squareType != 0 ) {
+            if ( curSquare.squareType != -1 && curSquare.squareType !== 0 ) {
                 rect( i * squareSize, j * squareSize, squareSize, squareSize );
             }
             //darken for light level
@@ -165,11 +173,11 @@ function draw( ) {
 function newDungeon( ) {
 
     //floors = (int)random(7, 10);
-    numFloors = 10;
+    numFloors = 2;
     //squares = (int)random(100, 150);
-    numSquares = 40;
+    numSquares = 30;
     //make numSquares odd
-    if ( numSquares % 2 == 0 ) {
+    if ( numSquares % 2 === 0 ) {
         numSquares--;
     }
 
@@ -181,6 +189,7 @@ function newDungeon( ) {
 
     //make a new dungeon
     dungeon = new Dungeon( numFloors, numSquares );
+    console.log("make dungeon");
     for ( let f of dungeon.floors ) {
         // if (f.floorNum < f.numFloors - 1 && !findPath(dungeon.floors.get(f.floorNum).stairDown, dungeon.floors.get(f.floorNum).stairUp, dungeon.floors.get(f.floorNum).board)) {
         //     startUp();
@@ -190,7 +199,7 @@ function newDungeon( ) {
                 if ( dungeon.floors[f.floorNum].board[i][j ].squareType == -1) {
                     dungeon.floors[f.floorNum].board[i][j ].texture = wallTextures[(floor(random( wallTextures.length )))];
                 }
-                if ( dungeon.floors[f.floorNum].board[i][j ].squareType == 0) {
+                if ( dungeon.floors[f.floorNum].board[i][j ].squareType === 0) {
                     dungeon.floors[f.floorNum].board[i][j ].texture = floorTextures[(floor(random( floorTextures.length )))];
                 }
             }
@@ -199,5 +208,16 @@ function newDungeon( ) {
 
     //player = new Player(dungeon.floors.get(0).stairUp.x, dungeon.floors.get(0).stairUp.y);
     //player.update();
+
+
+  function keyTyped(){
+    
+    if(key === 'n'){
+      
+      newDungeon();
+      
+    }
+    
+  }
 
 }

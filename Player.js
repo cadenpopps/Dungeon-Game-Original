@@ -1,4 +1,4 @@
-functio Player( _x, _y ) {
+function Player( _x, _y ) {
 
     ArrayList < Square > canSee;
     ArrayList < Square > hasSeen;
