@@ -56,7 +56,7 @@ function setup( ) {
 
 function draw( ) {
 
-    background(0 );
+    background( 0 );
 
     push( );
     //var scale = (numSquares)/15;
@@ -71,14 +71,14 @@ function draw( ) {
             switch ( curSquare.squareType ) {
                 case 0:
                     //path
-                    fill(255);
+                    fill( 255 );
                     rect( i * squareSize, j * squareSize, squareSize, squareSize );
                     //image( curSquare.texture, i * squareSize, j * squareSize, squareSize, squareSize );
 
                     break;
                 case - 1:
                     //wall
-                    fill(0);
+                    fill( 0 );
                     rect( i * squareSize, j * squareSize, squareSize, squareSize );
                     //image( curSquare.texture, i * squareSize, j * squareSize, squareSize, squareSize );
                     break;
@@ -174,7 +174,7 @@ function newDungeon( ) {
     }
 
     //calc new squareSize
-    squareSize = floor(( height-100) / numSquares);
+    squareSize = floor( ( height - 100 ) / numSquares );
 
     //reset currentFloor
     currentFloor = 0;
