@@ -8,7 +8,7 @@ function Player(_x, _y) {
     //list of squares the player has seen
     this.hasSeen = [];
     //the furthest distance a player can see
-    const radius = 20;
+    const RADIUS = 20;
 
 
     //update player visibility, line of sight, etc. called on moves and on new floors
@@ -16,7 +16,7 @@ function Player(_x, _y) {
 
 
         //if the player is on the down stair, start the nextFloorAnimation
-        if (dungeon.floors[currentFloor].board[this.x][this.y].squareType == -2) {
+        if (dungeon.floors[currentFloor].board[this.x][this.y].squareType == STAIRDOWN) {
             nextFloorAnimation = true;
         }
 
@@ -31,9 +31,9 @@ function Player(_x, _y) {
             }
         }
 
-        //line of sight within radius. can see if not blocked, if it is the blocker, or if it's in the same region and the region is a room
-        for (var i = this.x - radius; i <= this.x + radius; i++) {
-            for (var j = this.y - radius; j <= this.y + radius; j++) {
+        //line of sight within RADIUS. can see if not blocked, if it is the blocker, or if it's in the same region and the region is a room
+        for (var i = this.x - RADIUS; i <= this.x + RADIUS; i++) {
+            for (var j = this.y - RADIUS; j <= this.y + RADIUS; j++) {
                 if (i >= 0 && j >= 0 && i < numSquares && j < numSquares) {
                     var l = new SightLine(this.x, this.y, i, j);
                     if (!l.straight) {
@@ -48,7 +48,7 @@ function Player(_x, _y) {
                             //this.canSee.add(l.touching.get(k));
                             continue;
                         }
-                        else if (l.touching[k].squareType == -1 || (l.touching[k].squareType == -5 && !l.touching[k].isOpen)) {
+                        else if (l.touching[k].squareType == WALL || (l.touching[k].squareType == -5 && !l.touching[k].isOpen)) {
                             blocked = true;
                             if (this.canSee.indexOf(l.touching[k]) == -1) {
                                 this.canSee.push(l.touching[k]);
@@ -80,11 +80,11 @@ function Player(_x, _y) {
 
         //pushs all squares around visible paths to this.hasSeen
         for (var a = this.canSee.length - 1; a >= 0; a--) {
-            if (this.canSee[a].squareType != -1 && (this.canSee[a].squareType != -5 || this.canSee[a].isOpen)) {
-                for (var i = this.canSee[a].locX - 1; i <= this.canSee[a].locX + 1; i++) {
-                    for (var j = this.canSee[a].locY - 1; j <= this.canSee[a].locY + 1; j++) {
-                        if (i >= 0 && j >= 0 && i < numSquares && j < numSquares && (i != this.canSee[a].locX || j != this.canSee[a].locY)) {
-                            if (!this.hasSeen.contains(dungeon.floors[currentFloor].board[i][j])) {
+            if (this.canSee[a].squareType != WALL && !(this.canSee[a].squareType == -5 && this.canSee[a].isOpen)) {
+                for (var i = this.canSee[a].x - 1; i <= this.canSee[a].x + 1; i++) {
+                    for (var j = this.canSee[a].y - 1; j <= this.canSee[a].y + 1; j++) {
+                        if (i >= 0 && j >= 0 && i < numSquares && j < numSquares && (i != this.canSee[a].x || j != this.canSee[a].y)) {
+                            if (this.hasSeen.indexOf((dungeon.floors[currentFloor].board[i][j])) == -1) {
                                 this.hasSeen.push(dungeon.floors[currentFloor].board[i][j]);
                             }
                         }
@@ -103,42 +103,42 @@ function Player(_x, _y) {
 
         switch (dir) {
             case 'u':
-                if (this.y > 0 && dungeon.floors[currentFloor].board[this.x][this.y - 1].squareType != -1 && dungeon.floors[currentFloor].board[this.x][this.y - 1].squareType != 2 && !dungeon.floors[currentFloor].board[this.x][this.y - 1].containsMob) {
+                if (this.y > 0 && dungeon.floors[currentFloor].board[this.x][this.y - 1].squareType != WALL && dungeon.floors[currentFloor].board[this.x][this.y - 1].squareType != LOOT && !dungeon.floors[currentFloor].board[this.x][this.y - 1].containsMob) {
                     this.y--;
                     sucess = true;
                 }
-                else if (dungeon.floors[currentFloor].board[this.x][this.y - 1].squareType == -5 || dungeon.floors[currentFloor].board[this.x][this.y - 1].isOpen) {
+                else if (dungeon.floors[currentFloor].board[this.x][this.y - 1].squareType == -5 && dungeon.floors[currentFloor].board[this.x][this.y - 1].isOpen) {
                     this.y--;
                     sucess = true;
                 }
 
                 break;
             case 'd':
-                if (this.y < dungeon.floors[currentFloor].numSquares - 1 && dungeon.floors[currentFloor].board[this.x][this.y + 1].squareType != -1 && dungeon.floors[currentFloor].board[this.x][this.y + 1].squareType != 2 && !dungeon.floors[currentFloor].board[this.x][this.y + 1].containsMob) {
+                if (this.y < dungeon.floors[currentFloor].numSquares - 1 && dungeon.floors[currentFloor].board[this.x][this.y + 1].squareType != WALL && dungeon.floors[currentFloor].board[this.x][this.y + 1].squareType != LOOT && !dungeon.floors[currentFloor].board[this.x][this.y + 1].containsMob) {
                     this.y++;
                     sucess = true;
                 }
-                else if (dungeon.floors[currentFloor].board[this.x][this.y + 1].squareType == -5 || dungeon.floors[currentFloor].board[this.x][this.y + 1].isOpen) {
+                else if (dungeon.floors[currentFloor].board[this.x][this.y + 1].squareType == -5 && dungeon.floors[currentFloor].board[this.x][this.y + 1].isOpen) {
                     this.y++;
                     sucess = true;
                 }
                 break;
             case 'l':
-                if (this.x > 0 && dungeon.floors[currentFloor].board[this.x - 1][this.y].squareType != -1 && dungeon.floors[currentFloor].board[this.x - 1][this.y].squareType != 2 && !dungeon.floors[currentFloor].board[this.x - 1][this.y].containsMob) {
+                if (this.x > 0 && dungeon.floors[currentFloor].board[this.x - 1][this.y].squareType != WALL && dungeon.floors[currentFloor].board[this.x - 1][this.y].squareType != LOOT && !dungeon.floors[currentFloor].board[this.x - 1][this.y].containsMob) {
                     this.x--;
                     sucess = true;
                 }
-                else if (dungeon.floors[currentFloor].board[this.x - 1][this.y].squareType == -5 || dungeon.floors[currentFloor].board[this.x - 1][this.y].isOpen) {
+                else if (dungeon.floors[currentFloor].board[this.x - 1][this.y].squareType == -5 && dungeon.floors[currentFloor].board[this.x - 1][this.y].isOpen) {
                     this.x--;
                     sucess = true;
                 }
                 break;
             case 'r':
-                if (this.x < dungeon.floors[currentFloor].numSquares - 1 && dungeon.floors[currentFloor].board[this.x + 1][this.y].squareType != -1 && dungeon.floors[currentFloor].board[this.x + 1][this.y].squareType != 2 && !dungeon.floors[currentFloor].board[this.x + 1][this.y].containsMob) {
+                if (this.x < dungeon.floors[currentFloor].numSquares - 1 && dungeon.floors[currentFloor].board[this.x + 1][this.y].squareType != WALL && dungeon.floors[currentFloor].board[this.x + 1][this.y].squareType != LOOT && !dungeon.floors[currentFloor].board[this.x + 1][this.y].containsMob) {
                     this.x++;
                     sucess = true;
                 }
-                else if (dungeon.floors[currentFloor].board[this.x + 1][this.y].squareType == -5 || dungeon.floors[currentFloor].board[this.x + 1][this.y].isOpen) {
+                else if (dungeon.floors[currentFloor].board[this.x + 1][this.y].squareType == -5 && dungeon.floors[currentFloor].board[this.x + 1][this.y].isOpen) {
                     this.x++;
                     sucess = true;
                 }

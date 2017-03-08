@@ -71,7 +71,7 @@ function Mob(_x, _y) {
                this.y--;
                sucess = true;
             }
-            else if (dungeon.floors[currentFloor].board[this.x][this.y - 1].squareType != -5 || dungeon.floors[currentFloor].board[this.x][this.y - 1].isOpen) {
+            else if (dungeon.floors[currentFloor].board[this.x][this.y - 1].squareType == -5 && dungeon.floors[currentFloor].board[this.x][this.y - 1].isOpen) {
                this.y--;
                sucess = true;
             }
@@ -82,7 +82,7 @@ function Mob(_x, _y) {
                this.y++;
                sucess = true;
             }
-            else if (dungeon.floors[currentFloor].board[this.x][this.y + 1].squareType != -5 || dungeon.floors[currentFloor].board[this.x][this.y + 1].isOpen) {
+            else if (dungeon.floors[currentFloor].board[this.x][this.y + 1].squareType == -5 && dungeon.floors[currentFloor].board[this.x][this.y + 1].isOpen) {
                this.y++;
                sucess = true;
             }
@@ -92,7 +92,7 @@ function Mob(_x, _y) {
                this.x--;
                sucess = true;
             }
-            else if (dungeon.floors[currentFloor].board[this.x - 1][this.y].squareType != -5 || dungeon.floors[currentFloor].board[this.x - 1][this.y].isOpen) {
+            else if (dungeon.floors[currentFloor].board[this.x - 1][this.y].squareType == -5 && dungeon.floors[currentFloor].board[this.x - 1][this.y].isOpen) {
                this.x--;
                sucess = true;
             }
@@ -102,7 +102,7 @@ function Mob(_x, _y) {
                this.x++;
                sucess = true;
             }
-            else if (dungeon.floors[currentFloor].board[this.x + 1][this.y].squareType != -5 || dungeon.floors[currentFloor].board[this.x + 1][this.y].isOpen) {
+            else if (dungeon.floors[currentFloor].board[this.x + 1][this.y].squareType != -5 && dungeon.floors[currentFloor].board[this.x + 1][this.y].isOpen) {
                this.x++;
                sucess = true;
             }

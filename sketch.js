@@ -17,6 +17,16 @@ var playerTexture;
 var stairUpTexture;
 var stairDownTexture;
 
+
+const LOOT = 2;
+const WALL = -1;
+const PATH = 0;
+const STAIRDOWN = -2;
+const STAIRUP = -3;
+const DOOR = -5;
+
+const RANGE = 40;
+
 //preload image assets
 function preload() {
 
@@ -32,7 +42,7 @@ function preload() {
 
 function setup() {
 
-    createCanvas(displayWidth, displayHeight);
+    createCanvas(windowWidth, windowHeight);
     currentFloor = 0;
     numSquares = 0;
     squareSize = 0;
@@ -48,11 +58,11 @@ function setup() {
     frameRate(30);
 
     // textSize(30);
-    // noStroke();
+    noStroke();
     //stroke(255);
 
 
-    loading = 10;
+    loading = 4;
     //newDungeon();
 }
 
@@ -61,115 +71,119 @@ function draw() {
     if (loading >= 2) {
         textSize(100);
         textAlign(CENTER);
-        fill(map(loading, 10, 2, 50, 0));
+        fill(0);
         rect(0, 0, width, height);
         fill(255);
         text("Loading...", 0, height / 2 - 100, width, height / 2);
         loading--;
     }
     if (loading == 1) {
-        noStroke();
-        fill(map(loading, 10, 2, 50, 0));
+
+        fill(0);
         rect(0, 0, width, height);
         fill(255);
         text("Loading...", 0, height / 2 - 100, width, height / 2);
         textAlign(LEFT);
         textSize(20);
-        newDungeon();
         loading--;
+        newDungeon();
         //firstFloorAnimation = true;
     }
     if (loading == 0) {
         background(0);
 
         push();
-        //var scale = (numSquares)/15;
-        //scale(scale);
-        //translate((-player.x*squareSize) + (width/scale/2) - (230/scale/2), (-player.y*squareSize)+(height/scale/2) - (30/scale/2));
-        for (var i = 0; i < numSquares; i++) {
-            for (var j = 0; j < numSquares; j++) {
+        //var s = floor((numSquares) / 15);
+        scale(2);
+        translate(floor((-player.x * squareSize) + (width / 4) - (squareSize / 2)), floor((-player.y * squareSize) + (height / 4) - squareSize / 2));
+        for (var i = player.x - RANGE; i < player.x + RANGE; i++) {
+            for (var j = player.y - RANGE; j < player.y + RANGE; j++) {
                 //current square
-                var curSquare = dungeon.floors[currentFloor].board[i][j];
+                if (i >= 0 && j >= 0 && i <= this.numSquares - 1 && j <= this.numSquares - 1) {
+                    var curSquare = dungeon.floors[currentFloor].board[i][j];
 
-                if (player.canSee.indexOf(curSquare) != -1 || player.hasSeen.indexOf(curSquare) != -1) {
-                    switch (curSquare.squareType) {
-                        case 0:
-                            //path
-                            fill(255);
-                            rect(i * squareSize, j * squareSize, squareSize, squareSize);
-                            //image( curSquare.texture, i * squareSize, j * squareSize, squareSize, squareSize );
+                    if (player.canSee.indexOf(curSquare) != -1 || player.hasSeen.indexOf(curSquare) != -1) {
+                        switch (curSquare.squareType) {
+                            case 0:
+                                //path
+                                fill(255);
+                                //floor(rect(i * squareSize, j * squareSize, squareSize, squareSize);
+                                //image( curSquare.texture, i * squareSize, j * squareSize, squareSize, squareSize );
 
-                            break;
-                        case -1:
-                            //wall
-                            fill(0);
-                            rect(i * squareSize, j * squareSize, squareSize, squareSize);
-                            //image( curSquare.texture, i * squareSize, j * squareSize, squareSize, squareSize );
-                            break;
-                        case -2:
-                            //stair down
-                            fill(150, 0, 0);
-                            break;
-                        case -3:
-                            //stair up
-                            fill(0, 150, 0);
-                            //image( stairTexture, i * squareSize, j * squareSize, squareSize, squareSize );
-                            break;
-                        case -5:
-                            //door
-                            if (curSquare.isOpen) {
-                                fill(150, 50, 20, 100);
-                            }
-                            else {
-                                fill(100, 50, 20);
-                            }
-                            break;
-                        case 1:
-                            //?
-                            fill(255, 100, 100);
-                            break;
-                        case 2:
-                            //loot
-                            fill(255, 50, 50);
-                            break;
-                        case 3:
-                            //mob
-                            fill(150, 255, 50);
-                            break;
-                    }
+                                break;
+                            case -1:
+                                //wall
+                                fill(50);
+                                //rect(i * squareSize, j * squareSize, squareSize, squareSize);
+                                //image( curSquare.texture, i * squareSize, j * squareSize, squareSize, squareSize );
+                                break;
+                            case -2:
+                                //stair down
+                                fill(150, 0, 0);
+                                break;
+                            case -3:
+                                //stair up
+                                fill(0, 150, 0);
+                                //image( stairTexture, i * squareSize, j * squareSize, squareSize, squareSize );
+                                break;
+                            case -5:
+                                //door
+                                if (curSquare.isOpen) {
+                                    fill(150, 50, 20, 100);
+                                }
+                                else {
+                                    fill(100, 50, 20);
+                                }
+                                break;
+                            case 1:
+                                //?
+                                fill(255, 100, 100);
+                                break;
+                            case 2:
+                                //loot
+                                fill(255, 50, 50);
+                                break;
+                            case 3:
+                                //mob
+                                fill(150, 255, 50);
+                                break;
+                        }
 
-                    //draw the square
-                    if (curSquare.squareType != -1 && curSquare.squareType !== 0) {
+                        //draw the square
+                        //if (curSquare.squareType != -1 && curSquare.squareType !== 0) {
                         rect(i * squareSize, j * squareSize, squareSize, squareSize);
-                    }
-                    //darken for light level
-                    // if (player.canSee.contains( curSquare )) {
-                    //     fill(0, 0, 10, constrain( curSquare.lightLevel * 15, 0, 255 ));
-                    //     rect( i * squareSize, j * squareSize, squareSize, squareSize );
-                    //     if (curSquare.containsMob && ( player.x != i || player.y != j )) {
-                    //         fill( 255, 100, 0, 180 );
-                    //         rect( i * squareSize + ( squareSize / 8 ), j * squareSize + ( squareSize / 8 ), squareSize / 1.25, squareSize / 1.25 );
-                    //     }
-                    // } else if (player.hasSeen.contains( curSquare )) {
-                    //     fill(0, constrain( curSquare.lightLevel * 15, 100, 255 ));
-                    //     rect( i * squareSize, j * squareSize, squareSize, squareSize );
-                    // }
+                        //}
+                        //darken for light level
+                        if (player.canSee.indexOf(curSquare) != -1) {
+                            fill(0, 0, 10, ((curSquare.lightLevel * 10)));
+                            rect(i * squareSize, j * squareSize, squareSize, squareSize);
+                            if (curSquare.containsMob && (player.x != i || player.y != j)) {
+                                fill(255, 100, 0, 180);
+                                rect(i * squareSize + (squareSize / 8), j * squareSize + (squareSize / 8), squareSize / 1.25, squareSize / 1.25);
+                            }
+                        }
+                        else if (player.hasSeen.indexOf(curSquare) != -1) {
+                            fill(0, constrain(curSquare.lightLevel * 10, 100, 255));
+                            rect(i * squareSize, j * squareSize, squareSize, squareSize);
+                        }
 
-                    //draw player
-                    // } else {
-                    //   fill(map(curSquare.lightLevel, 0, 10, 30, 0));
-                    //   rect(i*squareSize, j*squareSize, squareSize, squareSize);
+                        //draw player
+                        // } else {
+                        //   fill(map(curSquare.lightLevel, 0, 10, 30, 0));
+                        //   rect(i*squareSize, j*squareSize, squareSize, squareSize);
+                    }
                 }
             }
         }
 
-        //fill(255, 200, 200, 10);
+        fill(0, 200);
         //ellipse(player.x*squareSize+(squareSize/2), player.y*squareSize+(squareSize/2), 2/squareSize, 2/squareSize);
         //image( playerTexture, player.x * squareSize, player.y * squareSize, squareSize, squareSize );
         rect(player.x * squareSize + 2, player.y * squareSize + 2, squareSize - 4, squareSize - 4);
-
-
         pop();
+
+        //fill(255, 0, 0);
+        //rect(width / 2, height / 2, 10, 10);
 
         //up
         //rect(0, 0, 800, 50);
@@ -181,12 +195,13 @@ function draw() {
         //rect(0, 0, 50, 800);
         //rect(390, 390, 20, 20);
 
-        fill(255, 255, 210, 150);
-        rect(width - 400, 20, 380, height - 150);
+        fill(255, 150);
+        rect(width - 260, 10, 250, height - 20);
+        rect(10, 10, 250, height - 20);
 
         fill(255);
         //text( "Mobs: " + dungeon.floors.get( currentFloor ).mobs.size( ), width - 180, height - 120 );
-        text("Current Floor: " + (currentFloor + 1), width - 320, height - 150);
+        text("Current Floor: " + (currentFloor + 1), width - 320, height - 50);
     }
 }
 
@@ -194,22 +209,21 @@ function newDungeon() {
 
     //floors = (int)random(7, 10);
     numFloors = 2;
-    //squares = (int)random(100, 150);
-    numSquares = 30;
+    numSquares = parseInt(random(30, 60));
+    //numSquares = 30;
     //make numSquares odd
     if (numSquares % 2 === 0) {
         numSquares--;
     }
 
     //calc new squareSize
-    squareSize = floor((height - 100) / numSquares);
+    squareSize = floor((height - 100) / RANGE);
 
     //reset currentFloor
     currentFloor = 0;
 
     //make a new dungeon
     dungeon = new Dungeon(numFloors, numSquares);
-    console.log("make dungeon");
     for (let f of dungeon.floors) {
         // if (f.floorNum < f.numFloors - 1 && !findPath(dungeon.floors.get(f.floorNum).stairDown, dungeon.floors.get(f.floorNum).stairUp, dungeon.floors.get(f.floorNum).board)) {
         //     startUp();
@@ -229,6 +243,8 @@ function newDungeon() {
     player = new Player(dungeon.floors[0].stairUp.x, dungeon.floors[0].stairUp.y);
     player.update();
 
+    console.log("\n\n\n\nnumSquares = " + numSquares);
+
 }
 
 
@@ -236,7 +252,7 @@ function keyTyped() {
 
     if (key === 'n') {
 
-        newDungeon();
+        loading = 3;
 
     }
 

@@ -24,7 +24,7 @@ function Floor(_floorNum, _numSquares, _numFloors, _stairUp) {
     //generate board, fill with empty squares
     this.genBoard = function() {
 
-        this.board = new Array(numSquares);
+        this.board = new Array();
         for (var i = 0; i < numSquares; i++) {
             this.board[i] = new Array(numSquares);
             for (var j = 0; j < numSquares; j++) {
@@ -38,31 +38,31 @@ function Floor(_floorNum, _numSquares, _numFloors, _stairUp) {
 
         var tempTime = millis();
         this.genStairs();
-        console.log("genStairs\t\t" + floor((millis() - tempTime)));
+        console.log("genStairs\t\t\t\t" + floor((millis() - tempTime)));
 
         tempTime = millis();
         this.genRooms();
-        console.log("genRooms\t\t" + floor((millis() - tempTime)));
+        console.log("genRooms\t\t\t\t" + floor((millis() - tempTime)));
 
         tempTime = millis();
         this.genMaze();
-        console.log("genMaze\t\t" + floor((millis() - tempTime)));
+        console.log("genMaze\t\t\t\t\t" + floor((millis() - tempTime)));
 
         tempTime = millis();
         this.connectRegions();
-        console.log("connectRegions\t\t" + floor((millis() - tempTime)));
+        console.log("connectRegions\t\t\t" + floor((millis() - tempTime)));
 
         tempTime = millis();
         this.sparseMaze();
-        console.log("sparseMaze\t\t" + floor((millis() - tempTime)));
+        console.log("sparseMaze\t\t\t\t" + floor((millis() - tempTime)));
         for (var i = 0; i < (1 + floor(numSquares / 20)); i++) {
             tempTime = millis();
             this.removeDetours();
-            console.log("removeDetours\t\t" + floor((millis() - tempTime)));
+            console.log("removeDetours\t\t\t" + floor((millis() - tempTime)));
         }
         tempTime = millis();
         this.populate();
-        console.log("populate\t\t" + floor((millis() - tempTime)));
+        console.log("populate\t\t\t\t" + floor((millis() - tempTime)));
 
 
         //makes sure stair locations aren't overwritten
