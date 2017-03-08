@@ -14,13 +14,6 @@ function SightLine(sx, sy, ex, ey) {
       this.straight = true;
    }
 
-   if (!this.straight) {
-      findTouching();
-   }
-   else {
-      findStraightTouching();
-   }
-
    this.findTouching = function() {
 
       var deltax = this.startx - this.endx;
@@ -30,7 +23,7 @@ function SightLine(sx, sy, ex, ey) {
       var j = this.starty;
       if (this.startx < this.endx) {
          for (var i = this.startx; i <= this.endx; i++) {
-            this.touching.add(dungeon.floors.get(currentFloor).board[i][j]);
+            this.touching.push(dungeon.floors[currentFloor].board[i][j]);
             error = error + deltaerr;
             if (error >= 0.5) {
                if (this.starty < this.endy) {
@@ -45,7 +38,7 @@ function SightLine(sx, sy, ex, ey) {
       }
       else {
          for (var i = this.startx; i >= this.endx; i--) {
-            this.touching.add(dungeon.floors.get(currentFloor).board[i][j]);
+            this.touching.push(dungeon.floors[currentFloor].board[i][j]);
             error = error + deltaerr;
             if (error >= 0.5) {
                if (this.starty < this.endy) {
@@ -66,7 +59,7 @@ function SightLine(sx, sy, ex, ey) {
       var a = this.startx;
       if (this.starty < this.endy) {
          for (var b = this.starty; b <= this.endy; b++) {
-            this.touching.add(dungeon.floors.get(currentFloor).board[a][b]);
+            this.touching.push(dungeon.floors[currentFloor].board[a][b]);
             error = error + deltaerr;
             if (error >= 0.5) {
                if (this.startx < this.endx) {
@@ -81,7 +74,7 @@ function SightLine(sx, sy, ex, ey) {
       }
       else {
          for (var b = this.starty; b >= this.endy; b--) {
-            this.touching.add(dungeon.floors.get(currentFloor).board[a][b]);
+            this.touching.push(dungeon.floors[currentFloor].board[a][b]);
             error = error + deltaerr;
             if (error >= 0.5) {
                if (this.startx < this.endx) {
@@ -101,24 +94,24 @@ function SightLine(sx, sy, ex, ey) {
       if (this.startx == this.endx) {
          if (this.starty < this.endy) {
             for (var i = this.starty; i <= this.endy; i++) {
-               this.touching.add(dungeon.floors.get(currentFloor).board[this.startx][i]);
+               this.touching.push(dungeon.floors[currentFloor].board[this.startx][i]);
             }
          }
          else {
-            for (var i = starty; i >= endy; i--) {
-               touching.add(dungeon.floors.get(currentFloor).board[this.startx][i]);
+            for (var i = this.starty; i >= this.endy; i--) {
+               this.touching.push(dungeon.floors[currentFloor].board[this.startx][i]);
             }
          }
       }
       else if (this.starty == this.endy) {
          if (this.startx < this.endx) {
             for (var i = this.startx; i <= this.endx; i++) {
-               touching.add(dungeon.floors.get(currentFloor).board[i][this.starty]);
+               this.touching.push(dungeon.floors[currentFloor].board[i][this.starty]);
             }
          }
          else {
             for (var i = this.startx; i >= this.endx; i--) {
-               touching.add(dungeon.floors.get(currentFloor).board[i][this.starty]);
+               this.touching.push(dungeon.floors[currentFloor].board[i][this.starty]);
             }
          }
       }
