@@ -209,7 +209,7 @@ function newDungeon() {
 
     //floors = (int)random(7, 10);
     numFloors = 2;
-    numSquares = parseInt(random(30, 60));
+    numSquares = parseInt(random(30, 40));
     //numSquares = 30;
     //make numSquares odd
     if (numSquares % 2 === 0) {
@@ -311,4 +311,11 @@ function keyTyped() {
         }
 
     }
+}
+
+function mousePressed() {
+
+    player.openDoor();
+    player.attack();
+
 }
